@@ -17,5 +17,14 @@ object Instagraph {
     val df = spark.read.json("src/main/resources/data.json")
     df.printSchema()
     df.show()
+
+    val vertices = df.columns.toSeq
+    val edges: Map[String, Seq[String]] = df.collect()(0) // Extract first (and only) row for each column (user)
+      .getValuesMap[Seq[String]](vertices) // Map each vertex to its following
+      .mapValues[Seq[String]](_.filter(vertices.contains)) // Don't consider following outward vertices
+
+    edges.foreach { case (user: String, foll: Seq[String]) =>
+      println(user + " -> " + foll)
+    }
   }
 }
