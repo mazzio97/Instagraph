@@ -2,6 +2,8 @@ package com.instagraph
 
 import java.nio.file.{Files, Paths}
 
+import com.instagraph.indices.PageRank._
+import com.instagraph.indices.BetweennessCentrality._
 import org.apache.spark.SparkConf
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import org.apache.spark.rdd.RDD
@@ -26,11 +28,9 @@ object Instagraph {
 
   def main(args: Array[String]): Unit = {
 
-    def buildGraph(path: String): Graph[String, String] = {
+    def buildGraph(path: String): Graph[String, Unit] = {
 
       val df = spark.read.json(path)
-      // df.printSchema()
-      // df.show()
 
       val users = df.columns
 
@@ -41,12 +41,12 @@ object Instagraph {
       // Extract the ID of a vertex given the username
       val correspondence: String => VertexId = user => vertices.filter(v => v._2 == user).first()._1
 
-      val edges: RDD[Edge[String]] = sparkContext.parallelize(
+      val edges: RDD[Edge[Unit]] = sparkContext.parallelize(
         df.collect()(0) // Extract first (and only) row for each column (user)
           .getValuesMap[Seq[String]](users) // Map each vertex to its following
           .mapValues[Seq[String]](_.filter(users.contains)) // Don't consider following outward vertices
           .flatten { case (user, foll) => foll.map((user, _)) } // Convert map into pairs representing edges
-          .map( e => Edge(correspondence(e._1), correspondence(e._2), "follows") ) // GraphX representation
+          .map( e => Edge(correspondence(e._1), correspondence(e._2), ()) ) // GraphX representation
           .toSeq
       )
 
@@ -54,9 +54,9 @@ object Instagraph {
     }
 
     // if the graph has already been stored it is loaded, otherwise it is built using the file "data.json"
-    val graph: Graph[String, String] = if (Files.exists(Paths.get(resourcesPath + "graph"))) {
+    val graph: Graph[String, Unit] = if (Files.exists(Paths.get(resourcesPath + "graph"))) {
       val vertices = sparkContext.objectFile[(VertexId, String)](resourcesPath + "graph/vertices")
-      val edges = sparkContext.objectFile[Edge[String]](resourcesPath + "graph/edges")
+      val edges = sparkContext.objectFile[Edge[Unit]](resourcesPath + "graph/edges")
       Graph(vertices, edges)
     } else {
       val graph = buildGraph(resourcesPath + "data.json")
@@ -65,9 +65,6 @@ object Instagraph {
       graph
     }
 
-    println("Vertices: " + graph.vertices.count())
-    println("Edges: " + graph.edges.count())
-    println("Samples:")
-    graph.triplets.takeSample(withReplacement = false, num = 10).foreach(println)
+    // graph.pageRank.vertices.takeOrdered(graph.numVertices.toInt).foreach(println)
   }
 }
