@@ -3,3 +3,4 @@ bin/
 project/
 target/
 build/
+src/main/resources/graph
