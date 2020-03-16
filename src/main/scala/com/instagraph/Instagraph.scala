@@ -4,6 +4,7 @@ import java.nio.file.{Files, Paths}
 
 import com.instagraph.indices.BetweennessCentrality.BetweennessCentrality
 import com.instagraph.indices.PageRank.PageRank
+import com.instagraph.export.GraphExporter.GraphExporter
 
 import org.apache.spark.SparkConf
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
@@ -58,6 +59,8 @@ object Instagraph {
       graph.edges.saveAsObjectFile(resourcesPath + "graph/edges")
       graph
     }
+    // Save the graph in a visualizable format
+    graph.toGexf(resourcesPath, "mazzio97")
     // Compute PageRank index on the graph
     println("PageRank:")
     graph.pageRank(0.001)

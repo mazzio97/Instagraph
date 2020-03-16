@@ -4,3 +4,4 @@ project/
 target/
 build/
 src/main/resources/graph
+*.gexf
