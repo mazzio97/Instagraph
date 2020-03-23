@@ -7,13 +7,13 @@ import scala.reflect.ClassTag
 
 object ShortestPaths {
 
-  implicit class FewestHops[V: ClassTag, E: ClassTag](val graph: Graph[V, E]) {
+  implicit class Hops[V: ClassTag, E: ClassTag](val graph: Graph[V, E]) {
     def fewestHops(landmarks: Seq[VertexId]): Graph[SPMap, E] = {
       lib.ShortestPaths.run(graph, landmarks)
     }
   }
 
-  implicit class Dijkstra[V: ClassTag](graph: Graph[V, Double]) {
+  implicit class Distances[V: ClassTag](graph: Graph[V, Double]) {
     def dijkstra(origin: VertexId): Graph[(V, Double, List[VertexId]), Double] = {
       var g2 = graph.mapVertices((id, minDist) =>
         (false, if (id == origin) 0 else Double.PositiveInfinity, List[VertexId]())

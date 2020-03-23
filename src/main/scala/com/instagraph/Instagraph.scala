@@ -2,8 +2,6 @@ package com.instagraph
 
 import java.nio.file.{Files, Paths}
 
-import com.instagraph.indices.BetweennessCentrality.BetweennessCentrality
-import com.instagraph.indices.PageRank.PageRank
 import com.instagraph.utils.GraphManager
 import org.apache.spark.SparkConf
 import org.apache.spark.graphx.Graph
@@ -36,11 +34,10 @@ object Instagraph {
     println("PageRank:")
     graph.pageRank(0.001)
       .vertices
+      .join(graph.vertices)
       .values
       .sortBy(_._2, ascending = false)
       .take(10)
       .foreach(println)
-    // Compute Betweenness Centrality index on the graph
-    // graph.betweennessCentrality.vertices.takeOrdered(10).foreach(println)
   }
 }

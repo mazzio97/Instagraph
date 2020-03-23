@@ -1,7 +1,7 @@
 package com.instagraph.paths
 
-import ShortestPaths.Dijkstra
-import ShortestPaths.FewestHops
+import ShortestPaths.Distances
+import ShortestPaths.Hops
 import com.instagraph.SparkTest
 import org.apache.spark.graphx.{Edge, Graph}
 import org.scalatest.flatspec.AnyFlatSpec
