@@ -22,8 +22,8 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
 
   "Shortest paths from A" should "be equal to the expected minimum distances" in {
     val solution = Array(
-      ("D", 5.0, List(1L)), ("A", 0.0, List()), ("F", 11.0, List(1L, 4L)), ("C", 15.0, List(1L, 2L)),
-      ("G", 22.0, List(1L, 4L, 6L)), ("E", 14.0, List(1L, 2L)), ("B", 7.0, List(1L))
+      ("D", (5.0, List(1L))), ("A", (0.0, List())), ("F", (11.0, List(1L, 4L))), ("C", (15.0, List(1L, 2L))),
+      ("G", (22.0, List(1L, 4L, 6L))), ("E", (14.0, List(1L, 2L))), ("B", (7.0, List(1L)))
     )
     graph.dijkstra(1L).vertices.foreach(v => assert(solution.contains(v._2)))
   }
@@ -34,7 +34,7 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
 
     for (origin <- 1L to 7L) {
       val originMap = hopsVertices.filter(v => v._1 == origin).first()._2
-      unitaryGraph.dijkstra(origin).vertices.map(v => (v._1, v._2._2)).foreach(v =>
+      unitaryGraph.dijkstra(origin).vertices.map(v => (v._1, v._2._2._1)).foreach(v =>
         assert(originMap.getOrElse(v._1, Double.PositiveInfinity) == v._2)
       )
     }
