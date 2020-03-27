@@ -42,24 +42,48 @@ object ShortestPaths {
           def nextMap: Map[VertexId, ShortestPathInfo[E]] = triplet.srcAttr
           def originMap: Map[VertexId, ShortestPathInfo[E]] = triplet.dstAttr
           val resultMap: Map[VertexId, ShortestPathInfo[E]] = nextMap
-              .mapValues(nextInfo => ShortestPathInfo(nextId, numeric.plus(nextInfo.totalCost, edgeCost)))
-              .filter { case(destinationId, info) =>
+              .map { case(destinationId, nextInfo) =>
                 val originValue = originMap.get(destinationId)
-                originValue.isEmpty || numeric.lt(info.totalCost, originValue.get.totalCost)
-              }
+                val nextCost = numeric.plus(nextInfo.totalCost, edgeCost)
+                /*
+                 * if the origin has not yet a path heading towards that destination, this is obviously the shortest one
+                 * otherwise we check whether the cost of the current path is better than the current cost from the origin and:
+                 * - if the cost is higher (or the vertex is already contained in the successors list) we reject this path
+                 * - if the cost is lower we create a new path including the next vertex only into the list of successors
+                 * - if the cost is the same we add the next vertex into the list of successors
+                 */
+                val updatedInfo = if (originValue.isEmpty) {
+                  ShortestPathInfo(nextId, nextCost)
+                } else {
+                  val originInfo = originValue.get
+                  if (originInfo.successors.contains(nextId) || numeric.gt(nextCost, originInfo.totalCost)) ShortestPathInfo.toSelf
+                  else if (numeric.lt(nextCost, originInfo.totalCost)) ShortestPathInfo(nextId, nextCost)
+                  else originInfo.addSuccessors(nextId)
+                }
+                (destinationId, updatedInfo)
+              }.filter { case(_, updatedInfo) => updatedInfo.successors.nonEmpty }
           if (resultMap.isEmpty) Iterator.empty else Iterator((originId, resultMap))
         }
       
       val mergeMessages: (Map[VertexId, ShortestPathInfo[E]], Map[VertexId, ShortestPathInfo[E]]) => Map[VertexId, ShortestPathInfo[E]] =
-        (m, n) => (m.keySet ++ n.keySet).map(key => {
-          val mValue: Option[ShortestPathInfo[E]] = m.get(key)
-          val nValue: Option[ShortestPathInfo[E]] = n.get(key)
-          val value = if (mValue.isEmpty) nValue.get else if (nValue.isEmpty) mValue.get else {
+        (m, n) => (m.keySet ++ n.keySet).map(destinationId => {
+          val mValue: Option[ShortestPathInfo[E]] = m.get(destinationId)
+          val nValue: Option[ShortestPathInfo[E]] = n.get(destinationId)
+          /*
+           * if one of the two maps does not have a path for this destination, we return the other path
+           * otherwise we check whether the cost of one of the two paths path is better than the other one and:
+           * - if the cost is higher we use the other path(s)
+           * - if the cost is lower we use this one's path(s)
+           * - if the cost is the same we add the successor(s) of the other path(s) into this one's successor list
+           */
+          val updatedInfo = if (mValue.isEmpty) nValue.get else if (nValue.isEmpty) mValue.get else {
             val mInfo = mValue.get
             val nInfo = nValue.get
-            if (numeric.lt(mInfo.totalCost, nInfo.totalCost)) mInfo else nInfo
+            if (numeric.gt(mInfo.totalCost, nInfo.totalCost)) nInfo
+            else if (numeric.lt(mInfo.totalCost, nInfo.totalCost)) mInfo
+            else mInfo.addSuccessors(nInfo.successors.toList: _*)
           }
-          (key, value)
+          (destinationId, updatedInfo)
         }).toMap
 
       initialGraph.pregel[Map[VertexId, ShortestPathInfo[E]]](initialMsg = Map.empty)(

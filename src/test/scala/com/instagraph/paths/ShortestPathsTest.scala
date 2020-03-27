@@ -23,13 +23,13 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
 
   "Shortest paths from A" should "be equal to the expected minimum distances" in {
     val solution = Map(
-      1L -> (0.0, List(1L)),
-      2L -> (7.0, List(1L, 2L)),
-      3L -> (15.0, List(1L, 2L, 3L)),
-      4L -> (5.0, List(1L, 4L)),
-      5L -> (14.0, List(1L, 2L, 5L)),
-      6L -> (11.0, List(1L, 4L, 6L)),
-      7L -> (22.0, List(1L, 4L, 6L, 7L))
+      1L -> (0.0, Set(List(1L))),
+      2L -> (7.0, Set(List(1L, 2L))),
+      3L -> (15.0, Set(List(1L, 2L, 3L))),
+      4L -> (5.0, Set(List(1L, 4L))),
+      5L -> (14.0, Set(List(1L, 2L, 5L))),
+      6L -> (11.0, Set(List(1L, 4L, 6L))),
+      7L -> (22.0, Set(List(1L, 4L, 6L, 7L)))
     )
     assert(graph.allPairsShortestPath.shortestPathsMapFrom(1L) == solution)
   }
