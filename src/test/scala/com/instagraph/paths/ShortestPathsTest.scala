@@ -1,9 +1,11 @@
 package com.instagraph.paths
 
+import ShortestPathGraph.Manipulations
 import ShortestPaths.Distances
 import ShortestPaths.Hops
 import com.instagraph.SparkTest
-import org.apache.spark.graphx.{Edge, Graph}
+import org.apache.spark.graphx.lib.ShortestPaths.SPMap
+import org.apache.spark.graphx.{Edge, Graph, VertexId, VertexRDD}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ShortestPathsTest extends AnyFlatSpec with SparkTest {
@@ -21,22 +23,32 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
   private val graph = Graph(vertices, edges)
 
   "Shortest paths from A" should "be equal to the expected minimum distances" in {
-    val solution = Array(
-      ("D", (5.0, List(1L))), ("A", (0.0, List())), ("F", (11.0, List(1L, 4L))), ("C", (15.0, List(1L, 2L))),
-      ("G", (22.0, List(1L, 4L, 6L))), ("E", (14.0, List(1L, 2L))), ("B", (7.0, List(1L)))
+    val solution = Map(
+      1L -> (0.0, List(1L)),
+      2L -> (7.0, List(1L, 2L)),
+      3L -> (15.0, List(1L, 2L, 3L)),
+      4L -> (5.0, List(1L, 4L)),
+      5L -> (14.0, List(1L, 2L, 5L)),
+      6L -> (11.0, List(1L, 4L, 6L)),
+      7L -> (22.0, List(1L, 4L, 6L, 7L))
     )
-    graph.dijkstra(1L).vertices.foreach(v => assert(solution.contains(v._2)))
+    assert(graph.allPairsShortestPath().shortestPathsMapFrom(1L) == solution)
   }
 
   "Dijkstra and fewest hops" should "coincide for unitary edges graphs" in {
     val unitaryGraph: Graph[String, Double] = Graph(vertices, edges.map(e => Edge(e.srcId, e.dstId, 1.0)))
-    val hopsVertices = unitaryGraph.fewestHops(1L to 7L).vertices
 
-    for (origin <- 1L to 7L) {
-      val originMap = hopsVertices.filter(v => v._1 == origin).first()._2
-      unitaryGraph.dijkstra(origin).vertices.map(v => (v._1, v._2._2._1)).foreach(v =>
-        assert(originMap.getOrElse(v._1, Double.PositiveInfinity) == v._2)
-      )
-    }
+    val hopsVertices: List[(VertexId, VertexId, Int)] = unitaryGraph.fewestHops(1L to 7L)
+      .vertices
+      .collectAsMap()
+      .flatMap { case (origin, spMap) => spMap.map { case (destination, cost) => (origin, destination, cost) } }
+      .toList
+
+    val spVertices: List[(VertexId, VertexId, Int)] = unitaryGraph.allPairsShortestPath()
+      .toShortestPathMap
+      .flatMap { case (origin, spMap) => spMap.map { case (destination, info) => (origin, destination, info.totalCost.toInt) } }
+      .toList
+
+    hopsVertices.foreach(v => assert(spVertices.contains(v)))
   }
 }
