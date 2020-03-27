@@ -6,44 +6,63 @@ import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId, lib}
 import scala.reflect.ClassTag
 
 object ShortestPaths {
+  /**
+   * Implicit class to compute fewest hops on a graph
+   *
+   * @param graph the input graph
+   * @tparam V the vertex type
+   * @tparam E the edge type
+   */
   implicit class Hops[V: ClassTag, E: ClassTag](val graph: Graph[V, E]) {
     def fewestHops(landmarks: Seq[VertexId]): Graph[SPMap, E] = {
       lib.ShortestPaths.run(graph, landmarks)
     }
   }
 
-  implicit class Distances[V: ClassTag](graph: Graph[V, Double]) {
-    def allPairsShortestPath(): Graph[Map[VertexId, ShortestPathInfo], Double] = {
-      val defaultMap: Map[VertexId, ShortestPathInfo] =
-        graph.vertices.mapValues(_ => ShortestPathInfo.noPath).collectAsMap().toMap
+  /**
+   * Implicit class to compute all pairs shortest path on a graph
+   *
+   * @param graph the input graph
+   * @tparam V the vertex type
+   * @tparam E the edge type
+   */
+  implicit class Distances[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
+    def allPairsShortestPath(implicit numeric: Numeric[E]): Graph[Map[VertexId, ShortestPathInfo[E]], E] = {
+      val initialGraph: Graph[Map[VertexId, ShortestPathInfo[E]], E] =
+        graph.reverse.mapVertices((id, _) => Map(id -> ShortestPathInfo.toSelf))
 
-      val initialGraph: Graph[Map[VertexId, ShortestPathInfo], Double] =
-        graph.reverse.mapVertices((id, _) => defaultMap + (id -> ShortestPathInfo.toSelf))
+      val vertexProgram: (VertexId, Map[VertexId, ShortestPathInfo[E]], Map[VertexId, ShortestPathInfo[E]]) => Map[VertexId, ShortestPathInfo[E]] =
+        (_, vertexMap, receivedMap) => vertexMap ++ receivedMap
 
-      val vertexProgram: (VertexId, Map[VertexId, ShortestPathInfo], Map[VertexId, ShortestPathInfo]) => Map[VertexId, ShortestPathInfo] =
-        (id, vertexMap, receivedMap) => vertexMap ++ receivedMap
-
-      val sendMessage: EdgeTriplet[Map[VertexId, ShortestPathInfo], Double] => Iterator[(VertexId, Map[VertexId, ShortestPathInfo])] =
+      val sendMessage: EdgeTriplet[Map[VertexId, ShortestPathInfo[E]], E] => Iterator[(VertexId, Map[VertexId, ShortestPathInfo[E]])] =
         triplet => {
-          def edgeCost: Double = triplet.attr
+          def edgeCost: E = triplet.attr
           def nextId: VertexId = triplet.srcId
           def originId: VertexId = triplet.dstId
-          def nextMap: Map[VertexId, ShortestPathInfo] = triplet.srcAttr
-          def originMap: Map[VertexId, ShortestPathInfo] = triplet.dstAttr
-          val resultMap: Map[VertexId, ShortestPathInfo] = nextMap
-              .mapValues(nextInfo => ShortestPathInfo.through(nextId, nextInfo.totalCost + edgeCost))
-              .filter { case(destinationId, info) => info.totalCost + edgeCost < originMap(destinationId).totalCost }
+          def nextMap: Map[VertexId, ShortestPathInfo[E]] = triplet.srcAttr
+          def originMap: Map[VertexId, ShortestPathInfo[E]] = triplet.dstAttr
+          val resultMap: Map[VertexId, ShortestPathInfo[E]] = nextMap
+              .mapValues(nextInfo => ShortestPathInfo(nextId, numeric.plus(nextInfo.totalCost, edgeCost)))
+              .filter { case(destinationId, info) =>
+                val originValue = originMap.get(destinationId)
+                originValue.isEmpty || numeric.lt(info.totalCost, originValue.get.totalCost)
+              }
           if (resultMap.isEmpty) Iterator.empty else Iterator((originId, resultMap))
         }
       
-      val mergeMessages: (Map[VertexId, ShortestPathInfo], Map[VertexId, ShortestPathInfo]) => Map[VertexId, ShortestPathInfo] =
+      val mergeMessages: (Map[VertexId, ShortestPathInfo[E]], Map[VertexId, ShortestPathInfo[E]]) => Map[VertexId, ShortestPathInfo[E]] =
         (m, n) => (m.keySet ++ n.keySet).map(key => {
-          val mInfo: ShortestPathInfo = m.getOrElse(key, ShortestPathInfo.noPath)
-          val nInfo: ShortestPathInfo = n.getOrElse(key, ShortestPathInfo.noPath)
-          if (mInfo.totalCost < nInfo.totalCost) (key, mInfo) else (key, nInfo)
+          val mValue: Option[ShortestPathInfo[E]] = m.get(key)
+          val nValue: Option[ShortestPathInfo[E]] = n.get(key)
+          val value = if (mValue.isEmpty) nValue.get else if (nValue.isEmpty) mValue.get else {
+            val mInfo = mValue.get
+            val nInfo = nValue.get
+            if (numeric.lt(mInfo.totalCost, nInfo.totalCost)) mInfo else nInfo
+          }
+          (key, value)
         }).toMap
 
-      initialGraph.pregel[Map[VertexId, ShortestPathInfo]](initialMsg = Map.empty[VertexId, ShortestPathInfo])(
+      initialGraph.pregel[Map[VertexId, ShortestPathInfo[E]]](initialMsg = Map.empty)(
         vprog = vertexProgram, sendMsg = sendMessage, mergeMsg = mergeMessages
       )
     }

@@ -1,23 +1,20 @@
 package com.instagraph.paths
 
 import org.apache.spark.graphx.{Graph, VertexId}
-import spire.algebra.Sign.Positive
 
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 object ShortestPathGraph {
-  implicit class Manipulations(val spGraph: Graph[Map[VertexId, ShortestPathInfo], Double]) {
-    def toShortestPathMap: Map[VertexId, Map[VertexId, ShortestPathInfo]] =
+  implicit class Manipulations[E: ClassTag](val spGraph: Graph[Map[VertexId, ShortestPathInfo[E]], E]) {
+    def toShortestPathMap: Map[VertexId, Map[VertexId, ShortestPathInfo[E]]] =
       spGraph.vertices.collectAsMap().toMap
 
-    def shortestPathsMapFrom(origin: VertexId): Map[VertexId, (Double, List[VertexId])] = {
+    def shortestPathsMapFrom(origin: VertexId): Map[VertexId, (E, List[VertexId])] = {
       val spMap = toShortestPathMap
 
       spMap(origin).map { case(destination, info) =>
-        val path: List[VertexId] = if (info.totalCost == Double.PositiveInfinity) List.empty
-        else if (info.nextVertex.isEmpty) List(origin)
-        else {
+        val path: List[VertexId] = if (info.nextVertex.isEmpty) List(origin) else {
           val list: ListBuffer[VertexId] = ListBuffer(origin)
           @scala.annotation.tailrec
           def tailRecursion(node: VertexId): Unit = {
@@ -32,7 +29,7 @@ object ShortestPathGraph {
       }
     }
 
-    def shortestPathGraphFrom(origin: VertexId): Graph[(Double, List[VertexId]), Double] = {
+    def shortestPathGraphFrom(origin: VertexId): Graph[(E, List[VertexId]), E] = {
       val ssspMap = shortestPathsMapFrom(origin)
       spGraph.mapVertices { case(id, _) => ssspMap(id) }
     }

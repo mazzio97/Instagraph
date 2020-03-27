@@ -4,8 +4,7 @@ import ShortestPathGraph.Manipulations
 import ShortestPaths.Distances
 import ShortestPaths.Hops
 import com.instagraph.SparkTest
-import org.apache.spark.graphx.lib.ShortestPaths.SPMap
-import org.apache.spark.graphx.{Edge, Graph, VertexId, VertexRDD}
+import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ShortestPathsTest extends AnyFlatSpec with SparkTest {
@@ -32,7 +31,7 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
       6L -> (11.0, List(1L, 4L, 6L)),
       7L -> (22.0, List(1L, 4L, 6L, 7L))
     )
-    assert(graph.allPairsShortestPath().shortestPathsMapFrom(1L) == solution)
+    assert(graph.allPairsShortestPath.shortestPathsMapFrom(1L) == solution)
   }
 
   "Shortest paths and fewest hops" should "coincide for unitary edges graphs" in {
@@ -44,10 +43,9 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
       .flatMap { case (origin, spMap) => spMap.map { case (destination, cost) => (origin, destination, cost.toDouble) } }
       .toSet
 
-    val spVertices: Set[(VertexId, VertexId, Double)] = unitaryGraph.allPairsShortestPath()
+    val spVertices: Set[(VertexId, VertexId, Double)] = unitaryGraph.allPairsShortestPath
       .toShortestPathMap
       .flatMap { case (origin, spMap) => spMap.map { case (destination, info) => (origin, destination, info.totalCost) } }
-      .filter { case (_, _, cost) => cost != Double.PositiveInfinity }
       .toSet
 
     assert(spVertices == hopsVertices)
