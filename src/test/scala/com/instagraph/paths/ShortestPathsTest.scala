@@ -35,20 +35,21 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
     assert(graph.allPairsShortestPath().shortestPathsMapFrom(1L) == solution)
   }
 
-  "Dijkstra and fewest hops" should "coincide for unitary edges graphs" in {
+  "Shortest paths and fewest hops" should "coincide for unitary edges graphs" in {
     val unitaryGraph: Graph[String, Double] = Graph(vertices, edges.map(e => Edge(e.srcId, e.dstId, 1.0)))
 
-    val hopsVertices: List[(VertexId, VertexId, Int)] = unitaryGraph.fewestHops(1L to 7L)
+    val hopsVertices: Set[(VertexId, VertexId, Double)] = unitaryGraph.fewestHops(1L to 7L)
       .vertices
       .collectAsMap()
-      .flatMap { case (origin, spMap) => spMap.map { case (destination, cost) => (origin, destination, cost) } }
-      .toList
+      .flatMap { case (origin, spMap) => spMap.map { case (destination, cost) => (origin, destination, cost.toDouble) } }
+      .toSet
 
-    val spVertices: List[(VertexId, VertexId, Int)] = unitaryGraph.allPairsShortestPath()
+    val spVertices: Set[(VertexId, VertexId, Double)] = unitaryGraph.allPairsShortestPath()
       .toShortestPathMap
-      .flatMap { case (origin, spMap) => spMap.map { case (destination, info) => (origin, destination, info.totalCost.toInt) } }
-      .toList
+      .flatMap { case (origin, spMap) => spMap.map { case (destination, info) => (origin, destination, info.totalCost) } }
+      .filter { case (_, _, cost) => cost != Double.PositiveInfinity }
+      .toSet
 
-    hopsVertices.foreach(v => assert(spVertices.contains(v)))
+    assert(spVertices == hopsVertices)
   }
 }
