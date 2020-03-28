@@ -28,6 +28,10 @@ object ShortestPaths {
    */
   implicit class Distances[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
     def allPairsShortestPath(implicit numeric: Numeric[E]): Graph[Map[VertexId, ShortestPathInfo[E]], E] = {
+      /*
+       * the initial graph has reversed edges so that each node can receive messages from nodes that,
+       * in the original graph, were after itself (and not before)
+       */
       val initialGraph: Graph[Map[VertexId, ShortestPathInfo[E]], E] =
         graph.reverse.mapVertices((id, _) => Map(id -> ShortestPathInfo.toSelf))
 
@@ -41,27 +45,32 @@ object ShortestPaths {
           def originId: VertexId = triplet.dstId
           def nextMap: Map[VertexId, ShortestPathInfo[E]] = triplet.srcAttr
           def originMap: Map[VertexId, ShortestPathInfo[E]] = triplet.dstAttr
-          val resultMap: Map[VertexId, ShortestPathInfo[E]] = nextMap
-              .map { case(destinationId, nextInfo) =>
-                val originValue = originMap.get(destinationId)
-                val nextCost = numeric.plus(nextInfo.totalCost, edgeCost)
-                /*
-                 * if the origin has not yet a path heading towards that destination, this is obviously the shortest one
-                 * otherwise we check whether the cost of the current path is better than the current cost from the origin and:
-                 * - if the cost is higher (or the vertex is already contained in the successors list) we reject this path
-                 * - if the cost is lower we create a new path including the next vertex only into the list of successors
-                 * - if the cost is the same we add the next vertex into the list of successors
-                 */
-                val updatedInfo = if (originValue.isEmpty) {
-                  ShortestPathInfo(nextId, nextCost)
-                } else {
-                  val originInfo = originValue.get
-                  if (originInfo.successors.contains(nextId) || numeric.gt(nextCost, originInfo.totalCost)) ShortestPathInfo.toSelf
-                  else if (numeric.lt(nextCost, originInfo.totalCost)) ShortestPathInfo(nextId, nextCost)
-                  else originInfo.addSuccessors(nextId)
-                }
-                (destinationId, updatedInfo)
-              }.filter { case(_, updatedInfo) => updatedInfo.successors.nonEmpty }
+          val resultMap: Map[VertexId, ShortestPathInfo[E]] = nextMap.map { case(destinationId, nextInfo) =>
+            val originValue: Option[ShortestPathInfo[E]] = originMap.get(destinationId)
+            val nextCost: E = numeric.plus(nextInfo.totalCost, edgeCost)
+            val presences: Int = Option(nextInfo.successors.values.sum).filter(p => p > 0).getOrElse(1)
+            /*
+             * if the origin has not yet a path heading towards that destination, this is obviously the shortest one
+             * otherwise we check whether the cost of the current path is better than the current cost from the origin and:
+             * - if the cost is higher or the vertex is already contained in the successors list with the same number
+             *   of presences, namely there have been found no new shortest paths passing through this one, we reject it
+             * - if the cost is lower we create a new path including the next vertex only into the list of successors
+             * - if the cost is the same we add the next vertex into the list of successors
+             *
+             * > to be noted that the number of presences is computed as the sum of the presences of the successors of
+             *   the current successor node, and if this node has no successors then the value of is 1
+             */
+            val updatedInfo: Option[ShortestPathInfo[E]] = originValue match {
+              case None => Option(ShortestPathInfo(nextId, presences, nextCost))
+              case Some(originInfo) =>
+                val currentPresences = originInfo.successors.getOrElse(nextId, 0)
+                if (currentPresences == presences || numeric.gt(nextCost, originInfo.totalCost)) Option.empty
+                else if (numeric.lt(nextCost, originInfo.totalCost)) Option(ShortestPathInfo(nextId, presences, nextCost))
+                else Option(originInfo.addSuccessors((nextId, presences)))
+            }
+            (destinationId, updatedInfo)
+          }.filter { case(_, updatedInfo) => updatedInfo.isDefined }
+            .map { case(id, updatedInfo) => (id, updatedInfo.get) }
           if (resultMap.isEmpty) Iterator.empty else Iterator((originId, resultMap))
         }
       
@@ -86,7 +95,7 @@ object ShortestPaths {
           (destinationId, updatedInfo)
         }).toMap
 
-      initialGraph.pregel[Map[VertexId, ShortestPathInfo[E]]](initialMsg = Map.empty)(
+      initialGraph.pregel[Map[VertexId, ShortestPathInfo[E]]](initialMsg = Map.empty, maxIterations = 12)(
         vprog = vertexProgram, sendMsg = sendMessage, mergeMsg = mergeMessages
       )
     }

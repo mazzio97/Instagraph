@@ -44,7 +44,8 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
       .toSet
 
     val spVertices: Set[(VertexId, VertexId, Double)] = unitaryGraph.allPairsShortestPath
-      .toShortestPathMap
+      .vertices
+      .collectAsMap()
       .flatMap { case (origin, spMap) => spMap.map { case (destination, info) => (origin, destination, info.totalCost) } }
       .toSet
 

@@ -3,7 +3,6 @@ package com.instagraph.paths
 import org.apache.spark.graphx.{Graph, VertexId}
 
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 object ShortestPathGraph {
@@ -23,12 +22,12 @@ object ShortestPathGraph {
           } else {
             successors.foreach(nextId => {
               currentPath.push(nextId)
-              recursion(spMap(nextId)(destination).successors)
+              recursion(spMap(nextId)(destination).successors.keySet)
               currentPath.pop()
             })
           }
         }
-        recursion(info.successors)
+        recursion(info.successors.keySet)
         (destination, (info.totalCost, paths.toSet))
       }
     }
