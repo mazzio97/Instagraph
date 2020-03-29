@@ -1,5 +1,6 @@
 package com.instagraph.paths
 
+import com.instagraph.utils.MapUtils.Manipulations
 import org.apache.spark.graphx.lib.ShortestPaths.SPMap
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId, lib}
 
@@ -77,25 +78,18 @@ object ShortestPaths {
         }
       
       val mergeMessages: (ShortestPathsMap[E], ShortestPathsMap[E]) => ShortestPathsMap[E] =
-        (m, n) => (m.keySet ++ n.keySet).map(destinationId => {
-          val mValue: Option[ShortestPathInfo[E]] = m.get(destinationId)
-          val nValue: Option[ShortestPathInfo[E]] = n.get(destinationId)
-          /*
-           * if one of the two maps does not have a path for this destination, we return the other path
-           * otherwise we check whether the cost of one of the two paths path is better than the other one and:
-           * - if the cost is higher we use the other path(s)
-           * - if the cost is lower we use this one's path(s)
-           * - if the cost is the same we add the successor(s) of the other path(s) into this one's successor list
-           */
-          val updatedInfo = if (mValue.isEmpty) nValue.get else if (nValue.isEmpty) mValue.get else {
-            val mInfo = mValue.get
-            val nInfo = nValue.get
-            if (numeric.gt(mInfo.totalCost, nInfo.totalCost)) nInfo
-            else if (numeric.lt(mInfo.totalCost, nInfo.totalCost)) mInfo
-            else mInfo.addSuccessors(nInfo.successors.toList: _*)
-          }
-          (destinationId, updatedInfo)
-        }).toMap
+        /*
+         * assuming that both of the two maps have a path for this destination, we check whether the cost of the first
+         * path(s) is better than the second one and if it is:
+         * - higher we use the other path(s)
+         * - lower we use this one's path(s)
+         * - the same we add the successor(s) of the other path(s) into this one's successor list
+         */
+        (m, n) => m.merge(n, { case (key, nInfo, mInfo) =>
+          if (numeric.gt(mInfo.totalCost, nInfo.totalCost)) nInfo
+          else if (numeric.lt(mInfo.totalCost, nInfo.totalCost)) mInfo
+          else mInfo.addSuccessors(nInfo.successors.toList: _*)
+        })
 
       initialGraph.pregel[ShortestPathsMap[E]](initialMsg = Map.empty)(
         vprog = vertexProgram, sendMsg = sendMessage, mergeMsg = mergeMessages
