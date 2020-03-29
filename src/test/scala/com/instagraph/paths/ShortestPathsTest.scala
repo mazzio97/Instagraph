@@ -1,8 +1,8 @@
 package com.instagraph.paths
 
-import ShortestPathGraph.Manipulations
 import ShortestPaths.Distances
 import ShortestPaths.Hops
+import ShortestPathsUtils.Manipulations
 import com.instagraph.SparkTest
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -31,7 +31,7 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
       6L -> (11.0, Set(List(1L, 4L, 6L))),
       7L -> (22.0, Set(List(1L, 4L, 6L, 7L)))
     )
-    assert(graph.allPairsShortestPath.shortestPathsMapFrom(1L) == solution)
+    assert(graph.allPairsShortestPath.shortestPathsFrom(1L).vertices.collectAsMap() == solution)
   }
 
   "Shortest paths and fewest hops" should "coincide for unitary edges graphs" in {
