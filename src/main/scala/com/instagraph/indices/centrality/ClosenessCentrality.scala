@@ -4,9 +4,9 @@ import org.apache.spark.graphx.Graph
 
 import scala.reflect.ClassTag
 
-object ClosenessCentrality extends CentralityIndex[Double] {
+case class ClosenessCentrality[E: ClassTag]() extends CentralityIndex[Double, E] {
   // TODO
-  override def compute[V: ClassTag, E: ClassTag](graph: Graph[V, E]): Graph[Double, E] = {
+  override def compute[V: ClassTag](graph: Graph[V, E]): Graph[Double, E] = {
     graph.mapVertices((_, v) => 0.0)
   }
 }

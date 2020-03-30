@@ -1,22 +1,23 @@
 package com.instagraph.indices
 
 import com.instagraph.indices.centrality.{BetweennessCentrality, CentralityIndex, ClosenessCentrality, DegreeCentrality, EigenCentrality, PageRank}
-import com.instagraph.utils.GraphUtils.Manipulations
-
 import org.apache.spark.graphx.Graph
 
 import scala.reflect.ClassTag
 
 object Indices {
-  implicit class Centrality[V: ClassTag](graph: Graph[V, Double]) {
-    def pageRank: Graph[(V, Double), Double] = graph transformWith PageRank
+  implicit class Indices[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
+    def degreeCentrality: Graph[(V, (Int, Int)), E] = transformWith(DegreeCentrality())
 
-    def degreeCentrality: Graph[(V, (Int, Int)), Double] = graph transformWith DegreeCentrality
+    def betweennessCentrality(implicit numeric: Numeric[E]): Graph[(V, Double), E] = transformWith(BetweennessCentrality(numeric))
 
-    def closeCentrality: Graph[(V, Double), Double] = graph transformWith ClosenessCentrality
+    def pageRank: Graph[(V, Double), E] = transformWith(PageRank())
 
-    def betweennessCentrality: Graph[(V, Double), Double] = graph transformWith BetweennessCentrality
+    def eigenCentrality: Graph[(V, Double), E] = transformWith(EigenCentrality())
 
-    def eigenCentrality: Graph[(V, Double), Double] = graph transformWith EigenCentrality
+    def closeCentrality: Graph[(V, Double), E] = transformWith(ClosenessCentrality())
+
+    private def transformWith[M: ClassTag](index: CentralityIndex[M, E]): Graph[(V, M), E] =
+      index.compute(graph).outerJoinVertices(graph.vertices)((_, index, value) => (value.get, index))
   }
 }

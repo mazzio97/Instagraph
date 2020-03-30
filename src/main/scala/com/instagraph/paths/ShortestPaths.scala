@@ -43,11 +43,11 @@ object ShortestPaths {
 
       val sendMessage: EdgeTriplet[ShortestPathsMap[E], E] => Iterator[(VertexId, ShortestPathsMap[E])] =
         triplet => {
-          def edgeCost: E = triplet.attr
-          def nextId: VertexId = triplet.srcId
-          def originId: VertexId = triplet.dstId
-          def nextMap: ShortestPathsMap[E] = triplet.srcAttr
-          def originMap: ShortestPathsMap[E] = triplet.dstAttr
+          val edgeCost: E = triplet.attr
+          val nextId: VertexId = triplet.srcId
+          val originId: VertexId = triplet.dstId
+          val nextMap: ShortestPathsMap[E] = triplet.srcAttr
+          val originMap: ShortestPathsMap[E] = triplet.dstAttr
           val resultMap: ShortestPathsMap[E] = nextMap.map { case(destinationId, nextInfo) =>
             val originValue: Option[ShortestPathInfo[E]] = originMap.get(destinationId)
             val nextCost: E = numeric.plus(nextInfo.totalCost, edgeCost)
@@ -85,15 +85,18 @@ object ShortestPaths {
          * - lower we use this one's path(s)
          * - the same we add the successor(s) of the other path(s) into this one's successor list
          */
-        (m, n) => m.merge(n, { case (key, nInfo, mInfo) =>
+        (m, n) => m.merge(n, { case (_, nInfo, mInfo) =>
           if (numeric.gt(mInfo.totalCost, nInfo.totalCost)) nInfo
           else if (numeric.lt(mInfo.totalCost, nInfo.totalCost)) mInfo
           else mInfo.addSuccessors(nInfo.successors.toList: _*)
         })
 
+      /*
+       * edges are eventually reversed back to the original ones
+       */
       initialGraph.pregel[ShortestPathsMap[E]](initialMsg = Map.empty)(
         vprog = vertexProgram, sendMsg = sendMessage, mergeMsg = mergeMessages
-      )
+      ).reverse
     }
   }
 }

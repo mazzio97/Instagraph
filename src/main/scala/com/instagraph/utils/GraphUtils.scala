@@ -1,6 +1,5 @@
 package com.instagraph.utils
 
-import com.instagraph.indices.centrality.CentralityIndex
 import org.apache.spark.graphx.{Edge, Graph}
 
 import scala.reflect.ClassTag
@@ -32,13 +31,5 @@ object GraphUtils {
         graph.edges.filter(e2 => e1 == Edge(e2.dstId, e2.srcId, e2.attr)).count() > 0
       )
     }
-
-    def transformWith[M: ClassTag](index: CentralityIndex[M]): Graph[(V, M), E] = Graph(
-      index.compute(graph)
-        .vertices
-        .join(graph.vertices)
-        .mapValues(_.swap),
-      graph.edges
-    )
   }
 }

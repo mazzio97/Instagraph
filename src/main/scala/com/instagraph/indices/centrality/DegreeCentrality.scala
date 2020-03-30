@@ -4,8 +4,8 @@ import org.apache.spark.graphx.Graph
 
 import scala.reflect.ClassTag
 
-object DegreeCentrality extends CentralityIndex[(Int, Int)] {
-  override def compute[V: ClassTag, E: ClassTag](graph: Graph[V, E]): Graph[(Int, Int), E] = {
+case class DegreeCentrality[E: ClassTag]() extends CentralityIndex[(Int, Int), E] {
+  override def compute[V: ClassTag](graph: Graph[V, E]): Graph[(Int, Int), E] = {
     graph.outerJoinVertices[Int, Int](graph.inDegrees)((id, v, in) =>
       in.getOrElse(0)
     ).outerJoinVertices[Int, (Int, Int)](graph.outDegrees)((id, in, out) =>
