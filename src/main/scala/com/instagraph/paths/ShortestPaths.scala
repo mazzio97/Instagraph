@@ -1,17 +1,27 @@
 package com.instagraph.paths
 
-import com.instagraph.paths.allpairs.EachSuccessorWeighted
+import com.instagraph.paths.allpairs.{EachSuccessor, EachPathInfo, EachSuccessorWeighted, EachPathWeightedInfo, FromOrigin, SingleSuccessor, SingleSuccessorInfo}
 import com.instagraph.paths.hops.FewestHops
+import org.apache.spark.graphx.lib.ShortestPaths.SPMap
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId, lib}
 
 import scala.reflect.ClassTag
 
 object ShortestPaths {
-  implicit def fewestHops[V: ClassTag, E: ClassTag](graph: Graph[V, E]): FewestHops[V, E] =
-    new FewestHops(graph)
+  implicit class Hops[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
+    def fewestHops(landmarks: Seq[VertexId]): Graph[SPMap, E] = FewestHops(graph).fewestHops(landmarks)
+  }
 
-  implicit def allPairsShortestPath[V: ClassTag, E: ClassTag](graph: Graph[V, E])(implicit numeric: Numeric[E]): EachSuccessorWeighted[V, E] =
-    EachSuccessorWeighted(graph)
+  implicit class AllPairs[V: ClassTag, E: ClassTag](graph: Graph[V, E])(implicit numeric: Numeric[E]) {
+    def singleSuccessorAPSP: Graph[Map[VertexId, SingleSuccessorInfo[E]], E] =
+      SingleSuccessor(graph, direction = FromOrigin).computeAPSP
+
+    def eachSuccessorAPSP: Graph[Map[VertexId, EachPathInfo[E]], E] =
+      EachSuccessor(graph, direction = FromOrigin).computeAPSP
+
+    def eachSuccessorWeightedAPSP: Graph[Map[VertexId, EachPathWeightedInfo[E]], E] =
+      EachSuccessorWeighted(graph, direction = FromOrigin).computeAPSP
+  }
 }
 
 /**

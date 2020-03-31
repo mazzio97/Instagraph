@@ -30,7 +30,7 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
       6L -> (11.0, Set(List(1L, 4L, 6L))),
       7L -> (22.0, Set(List(1L, 4L, 6L, 7L)))
     )
-    assert(graph.allPairsShortestPath.shortestPathsFrom(1L).vertices.collectAsMap() == solution)
+    assert(graph.eachSuccessorWeightedAPSP.shortestPathsFrom(1L).vertices.collectAsMap() == solution)
   }
 
   "Shortest paths and fewest hops" should "coincide for unitary edges graphs" in {
@@ -42,7 +42,7 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
       .flatMap { case (origin, spMap) => spMap.map { case (destination, cost) => (origin, destination, cost.toDouble) } }
       .toSet
 
-    val spVertices: Set[(VertexId, VertexId, Double)] = unitaryGraph.allPairsShortestPath
+    val spVertices: Set[(VertexId, VertexId, Double)] = unitaryGraph.singleSuccessorAPSP
       .vertices
       .collectAsMap()
       .flatMap { case (origin, spMap) => spMap.map { case (destination, info) => (origin, destination, info.totalCost) } }

@@ -1,6 +1,6 @@
 package com.instagraph.indices.centrality
 
-import com.instagraph.paths.ShortestPaths._
+import com.instagraph.paths.ShortestPaths.AllPairs
 import com.instagraph.utils.MapUtils.Manipulations
 import org.apache.spark.graphx.{EdgeDirection, EdgeTriplet, Graph, VertexId}
 
@@ -14,10 +14,10 @@ case class BetweennessCentrality[E: ClassTag](implicit numeric: Numeric[E]) exte
   private case class VertexData(score: Double, shortestPaths: ShortestPathsMap, latestReceivedScores: ScoresMap)
 
   override def compute[V: ClassTag](graph: Graph[V, E]): Graph[Double, E] = {
-    val initialGraph: Graph[VertexData, E] = graph.allPairsShortestPath.mapVertices { (_, shortestPaths) =>
+    val initialGraph: Graph[VertexData, E] = graph.eachSuccessorWeightedAPSP.mapVertices { (_, shortestPaths) =>
       val updatedShortestPaths: ShortestPathsMap = shortestPaths.map { case (destination, info) =>
-        val totalShortestPaths: Int = info.successors.values.sum
-        val successorsMap: NormalizedSuccessorsMap = info.successors
+        val totalShortestPaths: Int = info.adjacentVertices.values.sum
+        val successorsMap: NormalizedSuccessorsMap = info.adjacentVertices
           .filter { case (next, _) => next != destination }
           .mapValues { presences => presences.toDouble / totalShortestPaths }
           .map(identity) // https://github.com/scala/bug/issues/7005

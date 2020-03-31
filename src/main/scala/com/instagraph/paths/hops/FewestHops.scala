@@ -12,7 +12,7 @@ import scala.reflect.ClassTag
  * @tparam V the vertex type
  * @tparam E the edge type
  */
-class FewestHops[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
+case class FewestHops[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
   def fewestHops(landmarks: Seq[VertexId]): Graph[SPMap, E] = {
     lib.ShortestPaths.run(graph, landmarks)
   }
