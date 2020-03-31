@@ -1,12 +1,12 @@
 package com.instagraph.indices.centrality
 
-import com.instagraph.paths.ShortestPaths.Distances
+import com.instagraph.paths.ShortestPaths._
 import com.instagraph.utils.MapUtils.Manipulations
 import org.apache.spark.graphx.{EdgeDirection, EdgeTriplet, Graph, VertexId}
 
 import scala.reflect.ClassTag
 
-case class BetweennessCentrality[E: ClassTag](override val numeric: Numeric[E]) extends NumericCentralityIndex[Double, E] {
+case class BetweennessCentrality[E: ClassTag](implicit numeric: Numeric[E]) extends CentralityIndex[Double, E] {
   type NormalizedSuccessorsMap = Map[VertexId, Double]
   type ShortestPathsMap = Map[VertexId, NormalizedSuccessorsMap]
   type ScoresMap = Map[VertexId, Double]
@@ -14,7 +14,7 @@ case class BetweennessCentrality[E: ClassTag](override val numeric: Numeric[E]) 
   private case class VertexData(score: Double, shortestPaths: ShortestPathsMap, latestReceivedScores: ScoresMap)
 
   override def compute[V: ClassTag](graph: Graph[V, E]): Graph[Double, E] = {
-    val initialGraph: Graph[VertexData, E] = graph.allPairsShortestPath(numeric).mapVertices { (_, shortestPaths) =>
+    val initialGraph: Graph[VertexData, E] = graph.allPairsShortestPath.mapVertices { (_, shortestPaths) =>
       val updatedShortestPaths: ShortestPathsMap = shortestPaths.map { case (destination, info) =>
         val totalShortestPaths: Int = info.successors.values.sum
         val successorsMap: NormalizedSuccessorsMap = info.successors

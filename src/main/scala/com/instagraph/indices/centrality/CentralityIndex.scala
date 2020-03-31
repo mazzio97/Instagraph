@@ -13,13 +13,3 @@ import scala.reflect.ClassTag
 trait CentralityIndex[M, E] {
   def compute[V: ClassTag](graph: Graph[V, E]): Graph[M, E]
 }
-
-/**
- * A generic centrality index which can be measured on a graph.
- *
- * @tparam M the vertex type of the output expected by the index
- * @tparam E the edge type of the graph
- */
-trait NumericCentralityIndex[M, E] extends CentralityIndex[M, E] {
-  val numeric: Numeric[E]
-}

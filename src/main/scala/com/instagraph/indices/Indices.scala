@@ -9,7 +9,7 @@ object Indices {
   implicit class Indices[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
     def degreeCentrality: Graph[(V, (Int, Int)), E] = transformWith(DegreeCentrality())
 
-    def betweennessCentrality(implicit numeric: Numeric[E]): Graph[(V, Double), E] = transformWith(BetweennessCentrality(numeric))
+    def betweennessCentrality(implicit numeric: Numeric[E]): Graph[(V, Double), E] = transformWith(BetweennessCentrality())
 
     def pageRank: Graph[(V, Double), E] = transformWith(PageRank())
 

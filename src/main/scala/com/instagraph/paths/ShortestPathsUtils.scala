@@ -1,5 +1,6 @@
 package com.instagraph.paths
 
+import com.instagraph.paths.allpairs.EachSuccessorWeightedInfo
 import org.apache.spark.graphx.{Graph, VertexId}
 
 import scala.collection.mutable
@@ -7,7 +8,7 @@ import scala.reflect.ClassTag
 
 // TODO: avoid the creation of a map as it is not an RDD
 object ShortestPathsUtils {
-  implicit class Manipulations[E: ClassTag](spGraph: Graph[Map[VertexId, ShortestPathInfo[E]], E]) {
+  implicit class Manipulations[E: ClassTag](spGraph: Graph[Map[VertexId, EachSuccessorWeightedInfo[E]], E]) {
     private def shortestPathsMapFrom(origin: VertexId): Map[VertexId, (E, Set[List[VertexId]])] = {
       val spMap = spGraph.vertices.collectAsMap().toMap
       spMap(origin).map { case(destination, info) =>

@@ -1,7 +1,6 @@
 package com.instagraph.paths
 
-import ShortestPaths.Distances
-import ShortestPaths.Hops
+import ShortestPaths._
 import ShortestPathsUtils.Manipulations
 import com.instagraph.SparkTest
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
