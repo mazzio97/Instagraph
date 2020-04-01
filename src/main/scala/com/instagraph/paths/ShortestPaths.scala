@@ -37,10 +37,19 @@ object ShortestPaths {
 }
 
 /**
- * Data structure to represent info about a shortest path.
+ * Data structure to represent info about the cost of the shortest paths between a pair of vertices
  *
  * @tparam C the edge/cost type
  */
 trait ShortestPathsInfo[+C] {
   val totalCost: C
+}
+
+/**
+ * Data structure to represent info about the cost and the actual paths of the shortest paths between a pair of vertices
+ *
+ * @tparam C the type of edge/cost
+ */
+trait ShortestPathsWithAdjacentVerticesInfo[+C] extends ShortestPathsInfo[C] {
+  def adjacentVertices: Set[VertexId]
 }

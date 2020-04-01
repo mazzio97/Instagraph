@@ -1,6 +1,6 @@
 package com.instagraph.paths.allpairs
 
-import com.instagraph.paths.ShortestPathsInfo
+import com.instagraph.paths.{ShortestPathsInfo, ShortestPathsWithAdjacentVerticesInfo}
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId}
 
 import scala.reflect.ClassTag
@@ -22,4 +22,7 @@ case class SinglePath[V: ClassTag, E: ClassTag](
     Option.empty
 }
 
-case class SinglePathInfo[C](override val totalCost: C, adjacentVertex: Option[VertexId]) extends ShortestPathsInfo[C]
+case class SinglePathInfo[+C](override val totalCost: C, adjacentVertex: Option[VertexId])
+  extends ShortestPathsWithAdjacentVerticesInfo[C] {
+  override def adjacentVertices: Set[VertexId] = adjacentVertex.toSet
+}

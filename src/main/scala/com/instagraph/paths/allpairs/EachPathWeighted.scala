@@ -1,6 +1,6 @@
 package com.instagraph.paths.allpairs
 
-import com.instagraph.paths.ShortestPathsInfo
+import com.instagraph.paths.{ShortestPathsInfo, ShortestPathsWithAdjacentVerticesInfo}
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId}
 
 import scala.reflect.ClassTag
@@ -23,14 +23,16 @@ case class EachPathWeighted[V: ClassTag, E: ClassTag](
   // need to update the info (note that if the vertex is not in the list of adjacent vertices the returned value is
   // zero, which will always be different from the number of total presences being them at least 1)
   override protected def sendingSameInfo(adjacentId: VertexId, updatedAdjacentInfo: Info, firstInfo: Info): Boolean =
-    updatedAdjacentInfo.totalPresences == firstInfo.adjacentVertices.getOrElse(adjacentId, 0)
+    updatedAdjacentInfo.totalPresences == firstInfo.adjacentMap.getOrElse(adjacentId, 0)
 
   override protected def mergeSameCost(mInfo: Info, nInfo: Info): Option[Info] =
-    Option(mInfo.addAdjacentVertices(nInfo.adjacentVertices.toList: _*))
+    Option(mInfo.addAdjacentVertices(nInfo.adjacentMap.toList: _*))
 }
 
-case class EachPathWeightedInfo[C](override val totalCost: C, adjacentVertices: Map[VertexId, Int]) extends ShortestPathsInfo[C] {
-  val totalPresences: Int = Option(adjacentVertices.values.sum).filter(p => p > 0).getOrElse(1)
-  def addAdjacentVertices(s: (VertexId, Int)*): EachPathWeightedInfo[C] = EachPathWeightedInfo(totalCost, adjacentVertices ++ s.toMap)
+case class EachPathWeightedInfo[+C](override val totalCost: C, adjacentMap: Map[VertexId, Int])
+  extends ShortestPathsWithAdjacentVerticesInfo[C] {
+  val totalPresences: Int = Option(adjacentMap.values.sum).filter(p => p > 0).getOrElse(1)
+  def addAdjacentVertices(s: (VertexId, Int)*): EachPathWeightedInfo[C] = EachPathWeightedInfo(totalCost, adjacentMap ++ s.toMap)
+  override def adjacentVertices: Set[VertexId] = adjacentMap.keySet
 }
 

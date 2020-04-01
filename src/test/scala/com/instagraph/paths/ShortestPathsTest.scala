@@ -3,6 +3,7 @@ package com.instagraph.paths
 import ShortestPaths._
 import ShortestPathsUtils.Manipulations
 import com.instagraph.SparkTest
+import com.instagraph.paths.allpairs.SinglePathInfo
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import org.apache.spark.rdd.RDD
 import org.scalatest.flatspec.AnyFlatSpec
@@ -16,7 +17,7 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest {
   )
   private val graph: Graph[Int, Int] = Graph(vertices, edges)
 
-  "Shortest paths from A" should "be equal to the expected minimum distances" in {
+  "Shortest paths from 0" should "be equal to the expected minimum distances" in {
     val solution: Map[VertexId, (Int, Set[List[VertexId]])] = Map(
       0L -> (0, Set(List(0L))),
       1L -> (1, Set(List(0L, 1L))),
