@@ -5,7 +5,7 @@ import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId}
 
 import scala.reflect.ClassTag
 
-case class EachSuccessorWeighted[V: ClassTag, E: ClassTag](
+case class EachPathWeighted[V: ClassTag, E: ClassTag](
   override val graph: Graph[V, E],
   override protected val direction: PathsDirection
 )(implicit numeric: Numeric[E]) extends AllPairShortestPaths[V, E, EachPathWeightedInfo[E]] {
@@ -19,14 +19,14 @@ case class EachSuccessorWeighted[V: ClassTag, E: ClassTag](
       adjacentId.map(id => Map(id -> adjacent.map(_.totalPresences).getOrElse(1))).getOrElse(Map.empty)
     )
 
-  // if the adjacentId is in the list of successors of the first vertex and has the same presences there is not need to
-  // update the info (note that if it is not in the successors the returned value is zero, which will always be
-  // different from the number of total presences being them at least 1)
-  override protected def dontUpdateInfo(adjacentId: VertexId, updatedAdjacentInfo: Info, firstInfo: Info): Boolean =
+  // if the adjacentId is in the list of adjacent vertices of the first vertex and has the same presences there is no
+  // need to update the info (note that if the vertex is not in the list of adjacent vertices the returned value is
+  // zero, which will always be different from the number of total presences being them at least 1)
+  override protected def sendingSameInfo(adjacentId: VertexId, updatedAdjacentInfo: Info, firstInfo: Info): Boolean =
     updatedAdjacentInfo.totalPresences == firstInfo.adjacentVertices.getOrElse(adjacentId, 0)
 
-  override protected def mergeSameCost(mInfo: Info, nInfo: Info): Info =
-    mInfo.addAdjacentVertices(nInfo.adjacentVertices.toList: _*)
+  override protected def mergeSameCost(mInfo: Info, nInfo: Info): Option[Info] =
+    Option(mInfo.addAdjacentVertices(nInfo.adjacentVertices.toList: _*))
 }
 
 case class EachPathWeightedInfo[C](override val totalCost: C, adjacentVertices: Map[VertexId, Int]) extends ShortestPathsInfo[C] {

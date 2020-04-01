@@ -48,14 +48,15 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
    * @param firstInfo the info of the first vertex of the path
    * @return true if the info of the adjacent vertex has not been updated, false otherwise
    */
-  protected def dontUpdateInfo(adjacentId: VertexId, updatedAdjacentInfo: I, firstInfo: I): Boolean
+  protected def sendingSameInfo(adjacentId: VertexId, updatedAdjacentInfo: I, firstInfo: I): Boolean
 
   /**
    * @param mInfo the info about a certain vertex on a certain shortest path between two vertices
    * @param nInfo the info about a different vertex on another shortest path between the same vertices with the same cost
-   * @return the merged info for the shortest paths between those two vertices
+   * @return the merged info for the shortest paths between those two vertices (Option.empty they can be considered
+   *         to be equal and the choice is left to the abstract class itself)
    */
-  protected def mergeSameCost(mInfo: I, nInfo: I): I
+  protected def mergeSameCost(mInfo: I, nInfo: I): Option[I]
 
   private final def toSelf(vertexId: VertexId): I =
     infoAbout(Option.empty, numeric.zero, Option.empty)
@@ -85,10 +86,10 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
           val updatedLastInfo: Option[I] = firstInfo match {
             case None => Option(updatedAdjacentInfo)
             case Some(originInfo) =>
-              if (dontUpdateInfo(adjacentId, updatedAdjacentInfo, originInfo)) Option.empty
+              if (sendingSameInfo(adjacentId, updatedAdjacentInfo, originInfo)) Option.empty
               else if (numeric.gt(adjacentCost, originInfo.totalCost)) Option.empty
               else if (numeric.lt(adjacentCost, originInfo.totalCost)) Option(updatedAdjacentInfo)
-              else Option(mergeSameCost(originInfo, updatedAdjacentInfo))
+              else mergeSameCost(originInfo, updatedAdjacentInfo)
           }
           (lastId, updatedLastInfo)
         }.filter { case(_, updatedLastInfo) => updatedLastInfo.isDefined }
@@ -101,13 +102,13 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
      * whether the cost of the first path(s) is better than the second one and if it is:
      * - higher, we use the other path(s)
      * - lower, we use this one's path(s)
-     * - the same, we delegate it to each implementation
+     * - the same, we delegate it to each implementation (if Option.empty is returned we choose the first one)
      */
     val mergeMessages: (ShortestPathsMap, ShortestPathsMap) => ShortestPathsMap =
       (m, n) => m.merge(n, { case (_, nInfo, mInfo) =>
         if (numeric.gt(mInfo.totalCost, nInfo.totalCost)) nInfo
         else if (numeric.lt(mInfo.totalCost, nInfo.totalCost)) mInfo
-        else mergeSameCost(mInfo, nInfo)
+        else mergeSameCost(mInfo, nInfo).getOrElse(mInfo)
       })
 
     graph.mapVertices((id, _) => Map(id -> toSelf(id))).pregel[ShortestPathsMap](initialMsg = Map.empty)(
