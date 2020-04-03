@@ -1,22 +1,22 @@
 package com.instagraph.paths.allpairs.fullpaths
 
-import com.instagraph.paths.{FullPathsInfo, ShortestPathsWithAdjacentVerticesInfo}
+import com.instagraph.paths.info.{FullPathsInfo, ShortestPathsWithAdjacentVerticesInfo}
 import com.instagraph.utils.MapUtils._
 import org.apache.spark.graphx.{EdgeDirection, EdgeTriplet, Graph, VertexId}
 
 import scala.reflect.ClassTag
 
 /**
- * Abstract class that computes the shortest paths from each vertex to each other vertex
+ * Abstract class that computes the shortest paths from each vertex to each other vertex.
  *
  * The results are stored into a map where the key is the origin vertex and the value is a graph in which each vertex
- * contains the full shortest path(s) from the key to the vertex in that specific graph
+ * contains the full shortest path(s) from the key to the vertex in that specific graph.
  *
  * The graphs obtained by each key of the map are computed from a previous computation of the all-pair-shortest-paths
  * graph (whose computation will be performed as soon as the class is instantiated), and in particular their computation
  * is performed whenever necessary, hence be sure not to call the computation more times as it is very expensive (also
  * notice that filtering, mapping and grouping will trigger the computation, that is why is highly recommended not to
- * use those methods on this map)
+ * use those methods on this map).
  *
  * @tparam V the vertex type
  * @tparam E the edge type

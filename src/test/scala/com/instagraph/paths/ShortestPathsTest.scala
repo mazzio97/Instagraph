@@ -2,8 +2,8 @@ package com.instagraph.paths
 
 import ShortestPaths._
 import com.instagraph.{SparkTest, TestCase}
-import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
-import com.instagraph.paths.allpairs.fullpaths.EachFullPathInfo
+import com.instagraph.paths.info.EachPathWeightedInfo
+import com.instagraph.paths.info.EachFullPathInfo
 import com.instagraph.testcases.{TestCase1, TestCase2}
 import org.apache.spark.graphx.VertexId
 import org.scalatest.flatspec.AnyFlatSpec

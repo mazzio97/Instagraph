@@ -1,10 +1,11 @@
 package com.instagraph.paths
 
-import com.instagraph.paths.allpairs.adjacents.{CostOnly, CostOnlyInfo, EachPath, EachPathInfo, EachPathWeighted, EachPathWeightedInfo, FromDestination, FromOrigin, SinglePath, SinglePathInfo}
-import com.instagraph.paths.allpairs.fullpaths.{EachFullPath, EachFullPathInfo, SingleFullPath, SingleFullPathInfo}
+import com.instagraph.paths.allpairs.adjacents.{CostOnly, EachPath, EachPathWeighted, FromDestination, FromOrigin, SinglePath}
+import com.instagraph.paths.allpairs.fullpaths.{EachFullPath, SingleFullPath}
 import com.instagraph.paths.hops.FewestHops
+import com.instagraph.paths.info.{CostOnlyInfo, EachPathInfo, EachPathWeightedInfo, SinglePathInfo}
 import org.apache.spark.graphx.lib.ShortestPaths.SPMap
-import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId, lib}
+import org.apache.spark.graphx.{Graph, VertexId}
 
 import scala.reflect.ClassTag
 
@@ -41,32 +42,4 @@ object ShortestPaths {
     def eachFullPath: EachFullPath[V, E] =
       EachFullPath(graph)
   }
-}
-
-/**
- * Data structure to represent info about the cost of the shortest paths between a pair of vertices
- *
- * @tparam C the edge/cost type
- */
-trait ShortestPathsInfo[+C] {
-  val totalCost: C
-}
-
-/**
- * Data structure to represent info about the cost and the actual paths of the shortest paths between a pair of vertices
- *
- * @tparam C the type of edge/cost
- */
-trait ShortestPathsWithAdjacentVerticesInfo[+C] extends ShortestPathsInfo[C] {
-  def adjacentVertices: Set[VertexId]
-}
-
-/**
- * Data structure to represent info about the cost and the actual full shortest path(s) between a pair of vertices
- *
- * @tparam C the type of edge/cost
- */
-trait FullPathsInfo[+C] {
-  val cost: C
-  def paths: Set[List[VertexId]]
 }

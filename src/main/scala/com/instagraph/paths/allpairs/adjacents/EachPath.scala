@@ -1,6 +1,6 @@
 package com.instagraph.paths.allpairs.adjacents
 
-import com.instagraph.paths.ShortestPathsWithAdjacentVerticesInfo
+import com.instagraph.paths.info.EachPathInfo
 import org.apache.spark.graphx.{Graph, VertexId}
 
 import scala.reflect.ClassTag
@@ -20,10 +20,4 @@ case class EachPath[V: ClassTag, E: ClassTag](
 
   override protected def mergeSameCost(mInfo: Info, nInfo: Info): Option[Info] =
     Option(mInfo.addAdjacentVertices(nInfo.adjacentSet.toList: _*))
-}
-
-case class EachPathInfo[+C](override val totalCost: C, adjacentSet: Set[VertexId])
-  extends ShortestPathsWithAdjacentVerticesInfo[C] {
-  def addAdjacentVertices(s: VertexId*): EachPathInfo[C] = EachPathInfo(totalCost, adjacentSet ++ s.toSet)
-  override def adjacentVertices: Set[VertexId] = adjacentSet
 }

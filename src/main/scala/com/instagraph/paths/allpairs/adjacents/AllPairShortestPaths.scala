@@ -1,16 +1,16 @@
 package com.instagraph.paths.allpairs.adjacents
 
-import com.instagraph.paths.ShortestPathsInfo
+import com.instagraph.paths.info.ShortestPathsInfo
 import com.instagraph.utils.MapUtils.Manipulations
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId}
 
 import scala.reflect.ClassTag
 
 /**
- * Abstract class that computes the shortest paths from each vertex to each other vertex
+ * Abstract class that computes the shortest paths from each vertex to each other vertex.
  *
  * At the end of the computation, each vertex v will contain in itself a map that associates to each other vertex w the
- * cost of the shortest path (v, w) if at least a path exists, otherwise the vertex w will not be in the map
+ * cost of the shortest path (v, w) if at least a path exists, otherwise the vertex w will not be in the map.
  *
  * Additional information can be stored into the map depending on the implementation, such as one or every possible
  * adjacent vertex that will lead to the last vertex w from the first vertex v so that the entire path can be
@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
  *   the adjacent vertex to be the successor and the last vertex (namely the key of the map) to be the destination
  * - 'FromDestination' we consider the first vertex (namely the vertices of the output graph) to be the destination of
  *   the paths, the adjacent vertex to be the predecessors and the last vertex (namely the key of the map) to be the
- *   origin
+ *   origin.
  *
  * @tparam V the vertex type
  * @tparam E the edge type
