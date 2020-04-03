@@ -3,7 +3,7 @@ package com.instagraph.paths
 import ShortestPaths._
 import ShortestPathsUtils.Manipulations
 import com.instagraph.SparkTest
-import com.instagraph.paths.allpairs.SinglePathInfo
+import com.instagraph.paths.allpairs.adjacents.SinglePathInfo
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import org.apache.spark.rdd.RDD
 import org.scalatest.flatspec.AnyFlatSpec

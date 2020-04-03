@@ -1,6 +1,6 @@
 package com.instagraph.paths
 
-import com.instagraph.paths.allpairs.{CostOnly, CostOnlyInfo, EachPath, EachPathInfo, EachPathWeighted, EachPathWeightedInfo, FromDestination, FromOrigin, SinglePath, SinglePathInfo}
+import com.instagraph.paths.allpairs.adjacents.{CostOnly, CostOnlyInfo, EachPath, EachPathInfo, EachPathWeighted, EachPathWeightedInfo, FromDestination, FromOrigin, SinglePath, SinglePathInfo}
 import com.instagraph.paths.hops.FewestHops
 import org.apache.spark.graphx.lib.ShortestPaths.SPMap
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId, lib}

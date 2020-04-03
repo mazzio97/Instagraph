@@ -1,4 +1,4 @@
-package com.instagraph.paths.allpairs
+package com.instagraph.paths.allpairs.adjacents
 
 import com.instagraph.paths.ShortestPathsInfo
 import com.instagraph.utils.MapUtils.Manipulations
