@@ -1,6 +1,6 @@
 package com.instagraph.paths.allpairs.fullpaths
 
-import com.instagraph.paths.ShortestPathsWithAdjacentVerticesInfo
+import com.instagraph.paths.{FullPathsInfo, ShortestPathsWithAdjacentVerticesInfo}
 import com.instagraph.utils.MapUtils._
 import org.apache.spark.graphx.{EdgeDirection, EdgeTriplet, Graph, VertexId}
 
@@ -28,31 +28,28 @@ abstract class FullPathsAllPairShortestPaths[
   E: ClassTag,
   I <: FullPathsInfo[E] : ClassTag,
   S <: ShortestPathsWithAdjacentVerticesInfo[E] : ClassTag
-](protected val spGraph: Graph[Map[VertexId, S], E])(implicit numeric: Numeric[E])
-  extends Map[VertexId, Graph[I, E]] with Serializable {
+](protected val spGraph: Graph[Map[VertexId, S], E])(implicit numeric: Numeric[E]) extends Serializable {
   type HeadsMap = Map[VertexId, Set[VertexId]]
 
-  final override val keySet: Set[VertexId] = spGraph.vertices.keys.toLocalIterator.toSet
+  final val vertices: Set[VertexId] = spGraph.vertices.keys.toLocalIterator.toSet
 
   protected def initializeInfo(cost: E, paths: List[VertexId]*): I
 
   /**
-   * Values are not pre-computed, but computed from the all-pair-shortest-paths graph each time to avoid memory consumption
+   * Throws an IllegalArgumentException if the vertex is not included in the set of vertices
    *
-   * @param key the origin of the paths
-   * @return a graph in which each vertex contains the full shortest path(s) from the origin to the vertex itself
+   * @param origin the origin vertex
+   * @return a graph containing the shortest paths from the origin to each other vertex
    */
-  final override def get(key: VertexId): Option[Graph[I, E]] =
-    if (keySet.contains(key)) Option(from(key)) else Option.empty
+  final def apply(origin: VertexId): Graph[I, E] =
+    if (vertices.contains(origin)) from(origin)
+    else throw new IllegalArgumentException(s"$origin is not one of the vertices")
 
-  final override def iterator: Iterator[(VertexId, Graph[I, E])] =
-    spGraph.vertices.keys.toLocalIterator.map(v => (v, from(v)))
+  final def iterator: Iterator[(VertexId, Graph[I, E])] =
+    spGraph.vertices.keys.toLocalIterator.map(origin => (origin, from(origin)))
 
-  final override def +[B1 >: Graph[I, E]](kv: (VertexId, B1)): Map[VertexId, B1] =
-    throw new UnsupportedOperationException("There is no meaning in adding a key to this kind of map")
-
-  final override def -(key: VertexId): Map[VertexId, Graph[I, E]] =
-    throw new UnsupportedOperationException("There is no meaning in removing a key to this kind of map")
+  final def foreach[U](f: (VertexId, Graph[I, E]) => U) : Unit =
+    iterator.foreach { case(origin, fpGraph) => f(origin, fpGraph) }
 
   private def from(origin: VertexId): Graph[I, E] = {
     /*
@@ -115,9 +112,4 @@ abstract class FullPathsAllPairShortestPaths[
       vprog = vertexProgram, sendMsg = sendMessage, mergeMsg = mergeMessages
     ).mapVertices((_, tuple) => tuple._1)
   }
-}
-
-abstract class FullPathsInfo[+E] {
-  val cost: E
-  def paths: Set[List[VertexId]]
 }

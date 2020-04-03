@@ -1,6 +1,7 @@
 package com.instagraph.paths
 
 import com.instagraph.paths.allpairs.adjacents.{CostOnly, CostOnlyInfo, EachPath, EachPathInfo, EachPathWeighted, EachPathWeightedInfo, FromDestination, FromOrigin, SinglePath, SinglePathInfo}
+import com.instagraph.paths.allpairs.fullpaths.{EachFullPath, EachFullPathInfo, SingleFullPath, SingleFullPathInfo}
 import com.instagraph.paths.hops.FewestHops
 import org.apache.spark.graphx.lib.ShortestPaths.SPMap
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId, lib}
@@ -33,6 +34,12 @@ object ShortestPaths {
 
     def eachPredecessorWeightedAPSP: Graph[Map[VertexId, EachPathWeightedInfo[E]], E] =
       EachPathWeighted(graph, direction = FromDestination).computeAPSP
+
+    def singleFullPath: SingleFullPath[V, E] =
+      SingleFullPath(graph)
+
+    def eachFullPath: EachFullPath[V, E] =
+      EachFullPath(graph)
   }
 }
 
@@ -52,4 +59,14 @@ trait ShortestPathsInfo[+C] {
  */
 trait ShortestPathsWithAdjacentVerticesInfo[+C] extends ShortestPathsInfo[C] {
   def adjacentVertices: Set[VertexId]
+}
+
+/**
+ * Data structure to represent info about the cost and the actual full shortest path(s) between a pair of vertices
+ *
+ * @tparam C the type of edge/cost
+ */
+trait FullPathsInfo[+C] {
+  val cost: C
+  def paths: Set[List[VertexId]]
 }

@@ -1,5 +1,6 @@
 package com.instagraph.paths.allpairs.fullpaths
 
+import com.instagraph.paths.FullPathsInfo
 import com.instagraph.paths.ShortestPaths._
 import com.instagraph.paths.allpairs.adjacents.EachPathInfo
 import org.apache.spark.graphx.{Graph, VertexId}
@@ -12,5 +13,5 @@ case class EachFullPath[V: ClassTag, E: ClassTag](graph: Graph[V, E])(implicit n
     EachFullPathInfo(cost, paths.toSet)
 }
 
-case class EachFullPathInfo[+E](override val cost: E, override val paths: Set[List[VertexId]])
-  extends FullPathsInfo[E]
+case class EachFullPathInfo[+C](override val cost: C, override val paths: Set[List[VertexId]])
+  extends FullPathsInfo[C]
