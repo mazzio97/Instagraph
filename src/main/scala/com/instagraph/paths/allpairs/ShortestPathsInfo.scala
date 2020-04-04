@@ -1,4 +1,4 @@
-package com.instagraph.paths.info
+package com.instagraph.paths.allpairs
 
 /**
  * Data structure to represent info about the cost of the shortest paths between a pair of vertices

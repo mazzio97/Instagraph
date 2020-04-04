@@ -1,6 +1,6 @@
 package com.instagraph.paths.allpairs.fullpaths
 
-import com.instagraph.paths.info.{FullPathsInfo, ShortestPathsWithAdjacentVerticesInfo}
+import com.instagraph.paths.allpairs.adjacents.ShortestPathsWithAdjacentVerticesInfo
 import com.instagraph.utils.MapUtils._
 import org.apache.spark.graphx.{EdgeDirection, EdgeTriplet, Graph, VertexId}
 
@@ -88,7 +88,7 @@ abstract class FullPathsAllPairShortestPaths[
             if (currentHead == origin) Seq(path)
             else receivedHeadsMap(currentHead).map(newHead => List(newHead) ++ path)
           }
-          (initializeInfo(info.cost, newPaths.toList: _*), receivedHeadsMap)
+          (initializeInfo(info.totalCost, newPaths.toList: _*), receivedHeadsMap)
         }
       }
 

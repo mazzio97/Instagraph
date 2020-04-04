@@ -1,6 +1,6 @@
 package com.instagraph.paths.allpairs.adjacents
 
-import com.instagraph.paths.info.ShortestPathsInfo
+import com.instagraph.paths.allpairs.ShortestPathsInfo
 import com.instagraph.utils.MapUtils.Manipulations
 import org.apache.spark.graphx.{EdgeTriplet, Graph, VertexId}
 
@@ -32,7 +32,7 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
   type ShortestPathsMap = Map[VertexId, I]
 
   protected val graph: Graph[V, E]
-  protected val direction: PathsDirection
+  protected val backwardPath: Boolean
 
   /**
    * @param adjacentId the adjacent vertex (of Option.empty if the info is for the first vertex itself)
@@ -117,9 +117,5 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
   }
 
   final def computeAPSP: Graph[ShortestPathsMap, E] =
-    if (direction == FromOrigin) startPregel(graph.reverse).reverse else startPregel(graph)
+    if (!backwardPath) startPregel(graph.reverse).reverse else startPregel(graph)
 }
-
-sealed trait PathsDirection
-case object FromOrigin extends PathsDirection
-case object FromDestination extends PathsDirection

@@ -1,8 +1,8 @@
 package com.instagraph.testcases
 
-import com.instagraph.paths.info.EachPathWeightedInfo
+import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
+import com.instagraph.paths.allpairs.fullpaths.EachFullPathInfo
 import com.instagraph.{SparkTest, TestCase}
-import com.instagraph.paths.info.EachFullPathInfo
 import org.apache.spark.graphx.Edge
 
 trait TestCase2 extends SparkTest {

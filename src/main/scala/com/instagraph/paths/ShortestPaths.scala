@@ -1,9 +1,9 @@
 package com.instagraph.paths
 
-import com.instagraph.paths.allpairs.adjacents.{CostOnly, EachPath, EachPathWeighted, FromDestination, FromOrigin, SinglePath}
+import com.instagraph.paths.allpairs.{CostOnly, CostOnlyInfo}
+import com.instagraph.paths.allpairs.adjacents.{EachPath, EachPathInfo, EachPathWeighted, EachPathWeightedInfo, SinglePath, SinglePathInfo}
 import com.instagraph.paths.allpairs.fullpaths.{EachFullPath, SingleFullPath}
 import com.instagraph.paths.hops.FewestHops
-import com.instagraph.paths.info.{CostOnlyInfo, EachPathInfo, EachPathWeightedInfo, SinglePathInfo}
 import org.apache.spark.graphx.lib.ShortestPaths.SPMap
 import org.apache.spark.graphx.{Graph, VertexId}
 
@@ -16,25 +16,25 @@ object ShortestPaths {
 
   implicit class AllPairs[V: ClassTag, E: ClassTag](graph: Graph[V, E])(implicit numeric: Numeric[E]) {
     def allPairsShortestPaths: Graph[Map[VertexId, CostOnlyInfo[E]], E] =
-      CostOnly(graph, direction = FromOrigin).computeAPSP
+      CostOnly(graph).computeAPSP
 
     def singleSuccessorAPSP: Graph[Map[VertexId, SinglePathInfo[E]], E] =
-      SinglePath(graph, direction = FromOrigin).computeAPSP
+      SinglePath(graph).computeAPSP
 
     def eachSuccessorAPSP: Graph[Map[VertexId, EachPathInfo[E]], E] =
-      EachPath(graph, direction = FromOrigin).computeAPSP
+      EachPath(graph).computeAPSP
 
     def eachSuccessorWeightedAPSP: Graph[Map[VertexId, EachPathWeightedInfo[E]], E] =
-      EachPathWeighted(graph, direction = FromOrigin).computeAPSP
+      EachPathWeighted(graph).computeAPSP
 
     def singlePredecessorAPSP: Graph[Map[VertexId, SinglePathInfo[E]], E] =
-      SinglePath(graph, direction = FromDestination).computeAPSP
+      SinglePath(graph, backwardPath = true).computeAPSP
 
     def eachPredecessorAPSP: Graph[Map[VertexId, EachPathInfo[E]], E] =
-      EachPath(graph, direction = FromDestination).computeAPSP
+      EachPath(graph, backwardPath = true).computeAPSP
 
     def eachPredecessorWeightedAPSP: Graph[Map[VertexId, EachPathWeightedInfo[E]], E] =
-      EachPathWeighted(graph, direction = FromDestination).computeAPSP
+      EachPathWeighted(graph, backwardPath = true).computeAPSP
 
     def singleFullPath: SingleFullPath[V, E] =
       SingleFullPath(graph)

@@ -1,15 +1,16 @@
-package com.instagraph.paths.allpairs.adjacents
+package com.instagraph.paths.allpairs
 
-import com.instagraph.paths.info.CostOnlyInfo
+import com.instagraph.paths.allpairs.adjacents.AllPairShortestPaths
 import org.apache.spark.graphx.{Graph, VertexId}
 
 import scala.reflect.ClassTag
 
 case class CostOnly[V: ClassTag, E: ClassTag](
-  override val graph: Graph[V, E],
-  override protected val direction: PathsDirection
+  override val graph: Graph[V, E]
 )(implicit numeric: Numeric[E]) extends AllPairShortestPaths[V, E, CostOnlyInfo[E]] {
   type Info = CostOnlyInfo[E]
+
+  override protected val backwardPath: Boolean = false
 
   override protected def infoAbout(adjacentId: Option[VertexId], cost: E, adjacent: Option[Info]): Info =
     CostOnlyInfo(cost)

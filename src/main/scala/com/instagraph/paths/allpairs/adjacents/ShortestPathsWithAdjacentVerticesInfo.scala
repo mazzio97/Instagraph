@@ -1,5 +1,6 @@
-package com.instagraph.paths.info
+package com.instagraph.paths.allpairs.adjacents
 
+import com.instagraph.paths.allpairs.ShortestPathsInfo
 import org.apache.spark.graphx.VertexId
 
 /**

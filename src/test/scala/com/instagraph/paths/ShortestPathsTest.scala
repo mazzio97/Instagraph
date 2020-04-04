@@ -1,9 +1,9 @@
 package com.instagraph.paths
 
 import ShortestPaths._
+import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
+import com.instagraph.paths.allpairs.fullpaths.EachFullPathInfo
 import com.instagraph.{SparkTest, TestCase}
-import com.instagraph.paths.info.EachPathWeightedInfo
-import com.instagraph.paths.info.EachFullPathInfo
 import com.instagraph.testcases.{TestCase1, TestCase2}
 import org.apache.spark.graphx.VertexId
 import org.scalatest.flatspec.AnyFlatSpec
@@ -42,7 +42,7 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest with TestCase1 with T
     testCases.foreach { test =>
       test.graph.singleFullPath(0L).vertices.foreach { case (destination, info) =>
         val solution: EachFullPathInfo[Int] = test.fullPathsSolutions(destination)
-        assert(solution.cost == info.cost)
+        assert(solution.totalCost == info.totalCost)
         assert(solution.paths.contains(info.path))
       }
 

@@ -1,7 +1,7 @@
 package com.instagraph.paths.allpairs.fullpaths
 
 import com.instagraph.paths.ShortestPaths._
-import com.instagraph.paths.info.{EachFullPathInfo, EachPathInfo}
+import com.instagraph.paths.allpairs.adjacents.EachPathInfo
 import org.apache.spark.graphx.{Graph, VertexId}
 
 import scala.reflect.ClassTag
