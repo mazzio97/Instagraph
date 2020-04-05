@@ -1,4 +1,4 @@
-package com.instagraph.paths.allpairs.fullpaths
+package com.instagraph.paths.allpairs.fullroutes
 
 import com.instagraph.paths.allpairs.adjacents.ShortestPathsWithAdjacentVerticesInfo
 import com.instagraph.utils.MapUtils._
@@ -23,11 +23,11 @@ import scala.reflect.ClassTag
  * @tparam I the info type
  * @tparam S the shortest path info type
  */
-abstract class FullPathsAllPairShortestPaths[
+abstract class FullRoutesAllPairShortestPaths[
   V: ClassTag,
   E: ClassTag,
-  I <: FullPathsInfo[E] : ClassTag,
-  S <: ShortestPathsWithAdjacentVerticesInfo[E] : ClassTag
+  I <: FullRoutesInfo[E]: ClassTag,
+  S <: ShortestPathsWithAdjacentVerticesInfo[E]: ClassTag
 ](protected val spGraph: Graph[Map[VertexId, S], E])(implicit numeric: Numeric[E]) extends Serializable {
   type HeadsMap = Map[VertexId, Set[VertexId]]
 
@@ -48,7 +48,7 @@ abstract class FullPathsAllPairShortestPaths[
   final def iterator: Iterator[(VertexId, Graph[I, E])] =
     spGraph.vertices.keys.toLocalIterator.map(origin => (origin, from(origin)))
 
-  final def foreach[U](f: (VertexId, Graph[I, E]) => U) : Unit =
+  final def foreach[U](f: (VertexId, Graph[I, E]) => U): Unit =
     iterator.foreach { case(origin, fpGraph) => f(origin, fpGraph) }
 
   private def from(origin: VertexId): Graph[I, E] = {

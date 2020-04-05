@@ -2,7 +2,7 @@ package com.instagraph.paths
 
 import com.instagraph.paths.allpairs.{CostOnly, CostOnlyInfo}
 import com.instagraph.paths.allpairs.adjacents.{EachPath, EachPathInfo, EachPathWeighted, EachPathWeightedInfo, SinglePath, SinglePathInfo}
-import com.instagraph.paths.allpairs.fullpaths.{EachFullPath, SingleFullPath}
+import com.instagraph.paths.allpairs.fullroutes.{EachFullRoute, SingleRoutePath}
 import com.instagraph.paths.hops.FewestHops
 import org.apache.spark.graphx.lib.ShortestPaths.SPMap
 import org.apache.spark.graphx.{Graph, VertexId}
@@ -36,10 +36,10 @@ object ShortestPaths {
     def eachPredecessorWeightedAPSP: Graph[Map[VertexId, EachPathWeightedInfo[E]], E] =
       EachPathWeighted(graph, backwardPath = true).computeAPSP
 
-    def singleFullPath: SingleFullPath[V, E] =
-      SingleFullPath(graph)
+    def singleFullPath: SingleRoutePath[V, E] =
+      SingleRoutePath(graph)
 
-    def eachFullPath: EachFullPath[V, E] =
-      EachFullPath(graph)
+    def eachFullPath: EachFullRoute[V, E] =
+      EachFullRoute(graph)
   }
 }

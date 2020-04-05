@@ -1,4 +1,4 @@
-package com.instagraph.paths.allpairs.fullpaths
+package com.instagraph.paths.allpairs.fullroutes
 
 import com.instagraph.paths.allpairs.ShortestPathsInfo
 import org.apache.spark.graphx.VertexId
@@ -8,13 +8,13 @@ import org.apache.spark.graphx.VertexId
  *
  * @tparam C the type of edge/cost
  */
-trait FullPathsInfo[+C] extends ShortestPathsInfo[C] {
+trait FullRoutesInfo[+C] extends ShortestPathsInfo[C] {
   def paths: Set[List[VertexId]]
 }
 
-case class SingleFullPathInfo[+C](override val totalCost: C, path: List[VertexId]) extends FullPathsInfo[C] {
+case class SingleFullRouteInfo[+C](override val totalCost: C, path: List[VertexId]) extends FullRoutesInfo[C] {
   override def paths: Set[List[VertexId]] = Set(path)
 }
 
-case class EachFullPathInfo[+C](override val totalCost: C, override val paths: Set[List[VertexId]])
-  extends FullPathsInfo[C]
+case class EachFullRouteInfo[+C](override val totalCost: C, override val paths: Set[List[VertexId]])
+  extends FullRoutesInfo[C]

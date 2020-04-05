@@ -1,7 +1,7 @@
 package com.instagraph.testcases
 
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
-import com.instagraph.paths.allpairs.fullpaths.EachFullPathInfo
+import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
 import com.instagraph.{SparkTest, TestCase}
 import org.apache.spark.graphx.Edge
 
@@ -13,25 +13,25 @@ trait TestCase2 extends SparkTest {
         ++ Seq(Edge(6L, 11L, 1), Edge(11L, 9L, 2))
     )),
     fullPathsSolutions = Map(
-      0L -> EachFullPathInfo(0, Set(List(0L))),
-      1L -> EachFullPathInfo(1, Set(List(0L, 1L))),
-      2L -> EachFullPathInfo(2, Set(List(0L, 1L, 2L))),
-      3L -> EachFullPathInfo(3, Set(List(0L, 1L, 3L))),
-      4L -> EachFullPathInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 1L, 2L, 4L))),
-      5L -> EachFullPathInfo(5, Set(List(0L, 1L, 3L, 4L, 5L), List(0L, 1L, 2L, 4L, 5L))),
-      6L -> EachFullPathInfo(6, Set(List(0L, 1L, 3L, 4L, 5L, 6L), List(0L, 1L, 2L, 4L, 5L, 6L))),
-      7L -> EachFullPathInfo(7, Set(List(0L, 1L, 3L, 4L, 5L, 6L, 7L), List(0L, 1L, 2L, 4L, 5L, 6L, 7L))),
-      8L -> EachFullPathInfo(8, Set(List(0L, 1L, 3L, 4L, 5L, 6L, 7L, 8L), List(0L, 1L, 2L, 4L, 5L, 6L, 7L, 8L))),
-      9L -> EachFullPathInfo(9, Set(
+      0L -> EachFullRouteInfo(0, Set(List(0L))),
+      1L -> EachFullRouteInfo(1, Set(List(0L, 1L))),
+      2L -> EachFullRouteInfo(2, Set(List(0L, 1L, 2L))),
+      3L -> EachFullRouteInfo(3, Set(List(0L, 1L, 3L))),
+      4L -> EachFullRouteInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 1L, 2L, 4L))),
+      5L -> EachFullRouteInfo(5, Set(List(0L, 1L, 3L, 4L, 5L), List(0L, 1L, 2L, 4L, 5L))),
+      6L -> EachFullRouteInfo(6, Set(List(0L, 1L, 3L, 4L, 5L, 6L), List(0L, 1L, 2L, 4L, 5L, 6L))),
+      7L -> EachFullRouteInfo(7, Set(List(0L, 1L, 3L, 4L, 5L, 6L, 7L), List(0L, 1L, 2L, 4L, 5L, 6L, 7L))),
+      8L -> EachFullRouteInfo(8, Set(List(0L, 1L, 3L, 4L, 5L, 6L, 7L, 8L), List(0L, 1L, 2L, 4L, 5L, 6L, 7L, 8L))),
+      9L -> EachFullRouteInfo(9, Set(
         List(0L, 1L, 3L, 4L, 5L, 6L, 11L, 9L), List(0L, 1L, 2L, 4L, 5L, 6L, 11L, 9L),
         List(0L, 1L, 3L, 4L, 5L, 6L, 7L, 8L, 9L), List(0L, 1L, 2L, 4L, 5L, 6L, 7L, 8L, 9L)
       )),
-      10L -> EachFullPathInfo(10, Set(
+      10L -> EachFullRouteInfo(10, Set(
         List(0L, 1L, 3L, 4L, 5L, 6L, 11L, 9L, 10L), List(0L, 1L, 3L, 4L, 5L, 10L),
         List(0L, 1L, 2L, 4L, 5L, 6L, 11L, 9L, 10L), List(0L, 1L, 2L, 4L, 5L, 10L),
         List(0L, 1L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L), List(0L, 1L, 2L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
       )),
-      11L -> EachFullPathInfo(7, Set(List(0L, 1L, 3L, 4L, 5L, 6L, 11L), List(0L, 1L, 2L, 4L, 5L, 6L, 11L)))
+      11L -> EachFullRouteInfo(7, Set(List(0L, 1L, 3L, 4L, 5L, 6L, 11L), List(0L, 1L, 2L, 4L, 5L, 6L, 11L)))
     ),
     adjacentsSolutions = Map(
       0L -> Map(

@@ -2,7 +2,7 @@ package com.instagraph.paths
 
 import ShortestPaths._
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
-import com.instagraph.paths.allpairs.fullpaths.EachFullPathInfo
+import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
 import com.instagraph.{SparkTest, TestCase}
 import com.instagraph.testcases.{TestCase1, TestCase2}
 import org.apache.spark.graphx.VertexId
@@ -41,7 +41,7 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest with TestCase1 with T
   "Full shortest paths from 0" should "be equal to the expected minimum distances" in {
     testCases.foreach { test =>
       test.graph.singleFullPath(0L).vertices.foreach { case (destination, info) =>
-        val solution: EachFullPathInfo[Int] = test.fullPathsSolutions(destination)
+        val solution: EachFullRouteInfo[Int] = test.fullPathsSolutions(destination)
         assert(solution.totalCost == info.totalCost)
         assert(solution.paths.contains(info.path))
       }

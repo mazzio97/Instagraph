@@ -1,7 +1,7 @@
 package com.instagraph.testcases
 
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
-import com.instagraph.paths.allpairs.fullpaths.EachFullPathInfo
+import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
 import com.instagraph.{SparkTest, TestCase}
 import org.apache.spark.graphx.Edge
 
@@ -13,11 +13,11 @@ trait TestCase1 extends SparkTest {
         ++ Seq(Edge(4L, 0L, 1))
     )),
     fullPathsSolutions = Map(
-      0L -> EachFullPathInfo(0, Set(List(0L))),
-      1L -> EachFullPathInfo(1, Set(List(0L, 1L))),
-      2L -> EachFullPathInfo(2, Set(List(0L, 2L), List(0L, 1L, 2L))),
-      3L -> EachFullPathInfo(3, Set(List(0L, 1L, 3L), List(0L, 2L, 3L), List(0L, 1L, 2L, 3L))),
-      4L -> EachFullPathInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 2L, 3L, 4L), List(0L, 1L, 2L, 3L, 4L)))
+      0L -> EachFullRouteInfo(0, Set(List(0L))),
+      1L -> EachFullRouteInfo(1, Set(List(0L, 1L))),
+      2L -> EachFullRouteInfo(2, Set(List(0L, 2L), List(0L, 1L, 2L))),
+      3L -> EachFullRouteInfo(3, Set(List(0L, 1L, 3L), List(0L, 2L, 3L), List(0L, 1L, 2L, 3L))),
+      4L -> EachFullRouteInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 2L, 3L, 4L), List(0L, 1L, 2L, 3L, 4L)))
     ),
     adjacentsSolutions = Map(
       0L -> Map(

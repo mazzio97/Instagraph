@@ -1,7 +1,7 @@
 package com.instagraph
 
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
-import com.instagraph.paths.allpairs.fullpaths.EachFullPathInfo
+import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
@@ -31,6 +31,6 @@ trait SparkTest {
 
 case class TestCase[E: ClassTag](
   graph: Graph[Int, E],
-  fullPathsSolutions: Map[VertexId, EachFullPathInfo[E]],
+  fullPathsSolutions: Map[VertexId, EachFullRouteInfo[E]],
   adjacentsSolutions: Map[VertexId, Map[VertexId, EachPathWeightedInfo[E]]]
 )
