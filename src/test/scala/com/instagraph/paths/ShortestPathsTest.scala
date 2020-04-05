@@ -12,7 +12,7 @@ class ShortestPathsTest extends AnyFlatSpec with TestCase1 with TestCase2 {
   val testCases: Seq[TestCase[Int]] = Seq(testCase1, testCase2)
 
   "Shortest paths with successors" should "contain the expected adjacent vertices" in {
-    testCases.foreach { test =>status
+    testCases.foreach { test =>
       test.graph.singleSuccessorAPSP.vertices.foreach { case (origin, spMap) =>
         spMap.foreach { case (destination, info) =>
           val solution: EachPathWeightedInfo[Int] = test.adjacentsSolutions(origin)(destination)
