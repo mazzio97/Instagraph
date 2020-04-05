@@ -12,13 +12,6 @@ trait TestCase1 extends SparkTest {
         .map { case (source, destination) => Edge(source.toLong, destination.toLong, (destination - source)) }
         ++ Seq(Edge(4L, 0L, 1))
     )),
-    fullPathsSolutions = Map(
-      0L -> EachFullRouteInfo(0, Set(List(0L))),
-      1L -> EachFullRouteInfo(1, Set(List(0L, 1L))),
-      2L -> EachFullRouteInfo(2, Set(List(0L, 2L), List(0L, 1L, 2L))),
-      3L -> EachFullRouteInfo(3, Set(List(0L, 1L, 3L), List(0L, 2L, 3L), List(0L, 1L, 2L, 3L))),
-      4L -> EachFullRouteInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 2L, 3L, 4L), List(0L, 1L, 2L, 3L, 4L)))
-    ),
     adjacentsSolutions = Map(
       0L -> Map(
         0L -> EachPathWeightedInfo(0, Map.empty),
@@ -54,7 +47,13 @@ trait TestCase1 extends SparkTest {
         2L -> EachPathWeightedInfo(3, Map(0L -> 2)),
         3L -> EachPathWeightedInfo(4, Map(0L -> 3)),
         4L -> EachPathWeightedInfo(0, Map.empty)
-      )
+      )),
+    fullRoutesSolutions = Map(
+      0L -> EachFullRouteInfo(0, Set(List(0L))),
+      1L -> EachFullRouteInfo(1, Set(List(0L, 1L))),
+      2L -> EachFullRouteInfo(2, Set(List(0L, 2L), List(0L, 1L, 2L))),
+      3L -> EachFullRouteInfo(3, Set(List(0L, 1L, 3L), List(0L, 2L, 3L), List(0L, 1L, 2L, 3L))),
+      4L -> EachFullRouteInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 2L, 3L, 4L), List(0L, 1L, 2L, 3L, 4L)))
     )
   )
 }

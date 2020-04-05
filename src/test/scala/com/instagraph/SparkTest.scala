@@ -23,7 +23,7 @@ trait SparkTest {
   sparkContext.setLogLevel("ERROR")
 
   def createGraph[E: ClassTag](edges: RDD[Edge[E]]): Graph[Int, E] = {
-    val numVertices: Int = edges.map(triplet => math.max(triplet.srcId, triplet.dstId)).max().toInt
+    val numVertices: Int = edges.map(triplet => math.max(triplet.srcId, triplet.dstId)).max().toInt + 1
     val vertices: RDD[(Long, Int)] = sparkContext.makeRDD(Seq.tabulate(numVertices)(i => (i.toLong, i)))
     Graph(vertices, edges)
   }
@@ -31,6 +31,6 @@ trait SparkTest {
 
 case class TestCase[E: ClassTag](
   graph: Graph[Int, E],
-  fullPathsSolutions: Map[VertexId, EachFullRouteInfo[E]],
-  adjacentsSolutions: Map[VertexId, Map[VertexId, EachPathWeightedInfo[E]]]
+  adjacentsSolutions: Map[VertexId, Map[VertexId, EachPathWeightedInfo[E]]],
+  fullRoutesSolutions: Map[VertexId, EachFullRouteInfo[E]]
 )

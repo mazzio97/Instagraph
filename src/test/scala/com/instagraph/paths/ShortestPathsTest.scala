@@ -3,16 +3,16 @@ package com.instagraph.paths
 import ShortestPaths._
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
 import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
-import com.instagraph.{SparkTest, TestCase}
+import com.instagraph.TestCase
 import com.instagraph.testcases.{TestCase1, TestCase2}
 import org.apache.spark.graphx.VertexId
 import org.scalatest.flatspec.AnyFlatSpec
 
-class ShortestPathsTest extends AnyFlatSpec with SparkTest with TestCase1 with TestCase2 {
+class ShortestPathsTest extends AnyFlatSpec with TestCase1 with TestCase2 {
   val testCases: Seq[TestCase[Int]] = Seq(testCase1, testCase2)
 
   "Shortest paths with successors" should "contain the expected adjacent vertices" in {
-    testCases.foreach { test =>
+    testCases.foreach { test =>status
       test.graph.singleSuccessorAPSP.vertices.foreach { case (origin, spMap) =>
         spMap.foreach { case (destination, info) =>
           val solution: EachPathWeightedInfo[Int] = test.adjacentsSolutions(origin)(destination)
@@ -41,13 +41,13 @@ class ShortestPathsTest extends AnyFlatSpec with SparkTest with TestCase1 with T
   "Full shortest paths from 0" should "be equal to the expected minimum distances" in {
     testCases.foreach { test =>
       test.graph.singleFullPath(0L).vertices.foreach { case (destination, info) =>
-        val solution: EachFullRouteInfo[Int] = test.fullPathsSolutions(destination)
+        val solution: EachFullRouteInfo[Int] = test.fullRoutesSolutions(destination)
         assert(solution.totalCost == info.totalCost)
         assert(solution.paths.contains(info.path))
       }
 
       test.graph.eachFullPath(0L).vertices.foreach { case (destination, info) =>
-        assert(test.fullPathsSolutions(destination) == info)
+        assert(test.fullRoutesSolutions(destination) == info)
       }
     }
   }
