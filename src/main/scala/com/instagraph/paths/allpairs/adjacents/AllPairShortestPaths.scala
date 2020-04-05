@@ -16,12 +16,11 @@ import scala.reflect.ClassTag
  * adjacent vertex that will lead to the last vertex w from the first vertex v so that the entire path can be
  * reconstructed by following those adjacent vertices in order.
  *
- * In particular, if the value of the field 'direction' is:
- * - 'FromOrigin' we consider the first vertex (namely the vertices of the output graph) to be the origin of the paths,
- *   the adjacent vertex to be the successor and the last vertex (namely the key of the map) to be the destination
- * - 'FromDestination' we consider the first vertex (namely the vertices of the output graph) to be the destination of
- *   the paths, the adjacent vertex to be the predecessors and the last vertex (namely the key of the map) to be the
- *   origin.
+ * In particular, if backwardPath is true we consider the first vertex (namely the vertices of the output graph)
+ * to be the origin of the paths, the adjacent vertex to be the successor and the last vertex (namely the key of the map)
+ * to be the destination. Otherwise, the first vertex (namely the vertices of the output graph) to be the destination of
+ * the paths, the adjacent vertex to be the predecessors and the last vertex (namely the key of the map) to be the
+ * origin.
  *
  * @tparam V the vertex type
  * @tparam E the edge type
@@ -35,22 +34,28 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
   protected val backwardPath: Boolean
 
   /**
-   * @param adjacentId the adjacent vertex (of Option.empty if the info is for the first vertex itself)
-   * @param cost the cost of the path
-   * @param adjacent the info of the adjacent vertex itself
-   * @return an info object to be stored as value under the key of the given vertex into another vertex map
+   * Update the info of the dst vertex of an edge with respect to the info of the src vertex (called the adjacent).
+   *
+   * @param adjacentId the id of the adjacent vertex (or Option.empty if the info is for the calling vertex itself)
+   * @param cost the cost of the path from a vertex in adjacent map to dst
+   * @param adjacentInfo the info about a particular vertex the adjacent currently owns
+   * @return an info object to be stored as value under the key of the given vertex into dst vertex map
    */
-  protected def infoAbout(adjacentId: Option[VertexId], cost: E, adjacent: Option[I]): I
+  protected def updateInfo(adjacentId: Option[VertexId], cost: E, adjacentInfo: Option[I]): I
 
   /**
+   * Check whether the next vertex in the path has already received the info you intend to send.
+   *
    * @param adjacentId the adjacent vertex
-   * @param updatedAdjacentInfo the updated info of the adjacent vertex
-   * @param firstInfo the info of the first vertex of the path
+   * @param updatedFirstInfo the updated info of the adjacent vertex
+   * @param currentFirstInfo the info of the first vertex of the path
    * @return true if the info of the adjacent vertex has not been updated, false otherwise
    */
-  protected def sendingSameInfo(adjacentId: VertexId, updatedAdjacentInfo: I, firstInfo: I): Boolean
+  protected def sendingSameInfo(adjacentId: VertexId, updatedFirstInfo: I, currentFirstInfo: I): Boolean
 
   /**
+   * The logic to adopt when info of two paths of same cost reach a vertex from the same origin.
+   *
    * @param mInfo the info about a certain vertex on a certain shortest path between two vertices
    * @param nInfo the info about a different vertex on another shortest path between the same vertices with the same cost
    * @return the merged info for the shortest paths between those two vertices (Option.empty they can be considered
@@ -59,41 +64,52 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
   protected def mergeSameCost(mInfo: I, nInfo: I): Option[I]
 
   private final def toSelf(vertexId: VertexId): I =
-    infoAbout(Option.empty, numeric.zero, Option.empty)
+    updateInfo(Option.empty, numeric.zero, Option.empty)
 
   private final def startPregel(graph: Graph[V, E]): Graph[ShortestPathsMap, E] = {
+    /*
+     * if a message arrives in a vertex it contains meaningful information so the map can be updated
+     * without any further checks.
+     */
     val vertexProgram: (VertexId, ShortestPathsMap, ShortestPathsMap) => ShortestPathsMap =
       (_, vertexMap, receivedMap) => vertexMap ++ receivedMap
 
+    /*
+     * first refers to the dst vertex while adjacent to the src vertex:
+     * we must determine if the information contained in an adjacent vertex is meaningful for updating
+     * the information of a first vertex and only in this case we must send from adjacent to first
+     * an SPMap containing exclusively the paths to update.
+     */
     val sendMessage: EdgeTriplet[ShortestPathsMap, E] => Iterator[(VertexId, ShortestPathsMap)] =
       triplet => {
         val edgeCost: E = triplet.attr
         val adjacentId: VertexId = triplet.srcId
         val adjacentMap: ShortestPathsMap = triplet.srcAttr
         val firstMap: ShortestPathsMap = triplet.dstAttr
-        val messageMap: ShortestPathsMap = adjacentMap.map { case(lastId, adjacentInfo) =>
+        val messageMap: ShortestPathsMap = adjacentMap.map { case (id, adjacentInfo) =>
           /*
            * if the first vertex has no paths heading towards that last one (case None), this is obviously the shortest
            * otherwise we check whether the cost of the current path is better than the current cost from the first and:
-           * - if the information turns out not to have been updated we reject the new info
+           * - if the information turns out not to have been updated we reject the new info (to avoid infinite loops)
            * - if the cost is higher we reject it as well
            * - if the cost is lower we create a new info object for the path including the adjacent vertex only
            * - if the cost is the same we merge the current info with the updated one
            */
-          val firstInfo: Option[I] = firstMap.get(lastId)
+          val optionFirstInfo: Option[I] = firstMap.get(id)
           val adjacentCost: E = numeric.plus(adjacentInfo.totalCost, edgeCost)
-          val updatedAdjacentInfo: I = infoAbout(Option(adjacentId), adjacentCost, Option(adjacentInfo))
-          val updatedLastInfo: Option[I] = firstInfo match {
-            case None => Option(updatedAdjacentInfo)
-            case Some(originInfo) =>
-              if (sendingSameInfo(adjacentId, updatedAdjacentInfo, originInfo)) Option.empty
-              else if (numeric.gt(adjacentCost, originInfo.totalCost)) Option.empty
-              else if (numeric.lt(adjacentCost, originInfo.totalCost)) Option(updatedAdjacentInfo)
-              else mergeSameCost(originInfo, updatedAdjacentInfo)
+          val partialUpdatedInfo: I = updateInfo(Option(adjacentId), adjacentCost, Option(adjacentInfo))
+          val updatedInfo: Option[I] = optionFirstInfo match {
+            case None => Option(partialUpdatedInfo)
+            case Some(firstInfo) =>
+              if (sendingSameInfo(adjacentId, partialUpdatedInfo, firstInfo)) Option.empty
+              else if (numeric.gt(adjacentCost, firstInfo.totalCost)) Option.empty
+              else if (numeric.lt(adjacentCost, firstInfo.totalCost)) Option(partialUpdatedInfo)
+              else mergeSameCost(firstInfo, partialUpdatedInfo)
           }
-          (lastId, updatedLastInfo)
-        }.filter { case(_, updatedLastInfo) => updatedLastInfo.isDefined }
-          .map { case(id, updatedLastInfo) => (id, updatedLastInfo.get) }
+          (id, updatedInfo)
+        }.filter { case (_, updatedInfo) => updatedInfo.isDefined }
+          .mapValues(updatedInfo => updatedInfo.get)
+          .map(identity)
         if (messageMap.isEmpty) Iterator.empty else Iterator((triplet.dstId, messageMap))
       }
 
@@ -116,6 +132,6 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
     )
   }
 
-  final def computeAPSP: Graph[ShortestPathsMap, E] =
+  final def compute: Graph[ShortestPathsMap, E] =
     if (!backwardPath) startPregel(graph.reverse).reverse else startPregel(graph)
 }

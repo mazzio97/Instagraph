@@ -16,25 +16,25 @@ object ShortestPaths {
 
   implicit class AllPairs[V: ClassTag, E: ClassTag](graph: Graph[V, E])(implicit numeric: Numeric[E]) {
     def allPairsShortestPaths: Graph[Map[VertexId, CostOnlyInfo[E]], E] =
-      CostOnly(graph).computeAPSP
+      CostOnly(graph).compute
 
     def singleSuccessorAPSP: Graph[Map[VertexId, SinglePathInfo[E]], E] =
-      SinglePath(graph).computeAPSP
+      SinglePath(graph).compute
 
     def eachSuccessorAPSP: Graph[Map[VertexId, EachPathInfo[E]], E] =
-      EachPath(graph).computeAPSP
+      EachPath(graph).compute
 
     def eachSuccessorWeightedAPSP: Graph[Map[VertexId, EachPathWeightedInfo[E]], E] =
-      EachPathWeighted(graph).computeAPSP
+      EachPathWeighted(graph).compute
 
     def singlePredecessorAPSP: Graph[Map[VertexId, SinglePathInfo[E]], E] =
-      SinglePath(graph, backwardPath = true).computeAPSP
+      SinglePath(graph, backwardPath = true).compute
 
     def eachPredecessorAPSP: Graph[Map[VertexId, EachPathInfo[E]], E] =
-      EachPath(graph, backwardPath = true).computeAPSP
+      EachPath(graph, backwardPath = true).compute
 
     def eachPredecessorWeightedAPSP: Graph[Map[VertexId, EachPathWeightedInfo[E]], E] =
-      EachPathWeighted(graph, backwardPath = true).computeAPSP
+      EachPathWeighted(graph, backwardPath = true).compute
 
     def singleFullPath: SingleRoutePath[V, E] =
       SingleRoutePath(graph)

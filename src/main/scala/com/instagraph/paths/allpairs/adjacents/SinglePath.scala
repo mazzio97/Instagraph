@@ -10,12 +10,12 @@ case class SinglePath[V: ClassTag, E: ClassTag](
 )(implicit numeric: Numeric[E]) extends AllPairShortestPaths[V, E, SinglePathInfo[E]] {
   type Info = SinglePathInfo[E]
 
-  override protected def infoAbout(adjacentId: Option[VertexId], cost: E, adjacent: Option[Info]): Info =
+  override protected def updateInfo(adjacentId: Option[VertexId], cost: E, adjacentInfo: Option[Info]): Info =
     SinglePathInfo(cost, adjacentId)
 
-  // if the adjacentId is the same adjacent vertex stored in the info of the first vertex there is not need to update
-  override protected def sendingSameInfo(adjacentId: VertexId, updatedAdjacentInfo: Info, firstInfo: Info): Boolean =
-    firstInfo.adjacentVertex.contains(adjacentId)
+  // if the adjacentId is the same adjacent vertex stored in the info of the first vertex there is no need to update
+  override protected def sendingSameInfo(adjacentId: VertexId, updatedFirstInfo: Info, currentFirstInfo: Info): Boolean =
+    currentFirstInfo.adjacentVertex.contains(adjacentId)
 
   override protected def mergeSameCost(mInfo: Info, nInfo: Info): Option[Info] =
     Option.empty

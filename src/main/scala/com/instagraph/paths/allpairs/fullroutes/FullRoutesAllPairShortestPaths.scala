@@ -49,7 +49,7 @@ abstract class FullRoutesAllPairShortestPaths[
     spGraph.vertices.keys.toLocalIterator.map(origin => (origin, from(origin)))
 
   final def foreach[U](f: (VertexId, Graph[I, E]) => U): Unit =
-    iterator.foreach { case(origin, fpGraph) => f(origin, fpGraph) }
+    iterator.foreach { case (origin, fpGraph) => f(origin, fpGraph) }
 
   private def from(origin: VertexId): Graph[I, E] = {
     /*
