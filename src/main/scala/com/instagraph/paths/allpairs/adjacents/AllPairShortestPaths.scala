@@ -86,7 +86,7 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
         val adjacentId: VertexId = triplet.srcId
         val adjacentMap: ShortestPathsMap = triplet.srcAttr
         val firstMap: ShortestPathsMap = triplet.dstAttr
-        val messageMap: ShortestPathsMap = adjacentMap.map { case (id, adjacentInfo) =>
+        val messageMap: ShortestPathsMap = adjacentMap.map { case (lastId, adjacentInfo) =>
           /*
            * if the first vertex has no paths heading towards that last one (case None), this is obviously the shortest
            * otherwise we check whether the cost of the current path is better than the current cost from the first and:
@@ -94,21 +94,28 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
            * - if the cost is higher we reject it as well
            * - if the cost is lower we create a new info object for the path including the adjacent vertex only
            * - if the cost is the same we merge the current info with the updated one
+           *
+           * notice that, as well as in the rest of the code, with first we intend the vertices of the output graph
+           * while with last the vertices that are keys of the shortest paths map, in particular we have that:
+           * - if backwardPath is set to true, the so-called first vertex is the destination of the path while the last
+           *   vertex is the origin (adjacent vertices are the predecessors of the destination towards the origin)
+           * - if backwardPaths is set to false, the so-called first vertex is the origin of the path while the last
+           *   vertex is the destination (adjacent vertices are the successors of the origin towards the destination)
            */
-          val optionFirstInfo: Option[I] = firstMap.get(id)
+          val optionLastInfo: Option[I] = firstMap.get(lastId)
           val adjacentCost: E = numeric.plus(adjacentInfo.totalCost, edgeCost)
-          val partialUpdatedInfo: I = updateInfo(Option(adjacentId), adjacentCost, Option(adjacentInfo))
-          val updatedInfo: Option[I] = optionFirstInfo match {
-            case None => Option(partialUpdatedInfo)
-            case Some(firstInfo) =>
-              if (sendingSameInfo(adjacentId, partialUpdatedInfo, firstInfo)) Option.empty
-              else if (numeric.gt(adjacentCost, firstInfo.totalCost)) Option.empty
-              else if (numeric.lt(adjacentCost, firstInfo.totalCost)) Option(partialUpdatedInfo)
-              else mergeSameCost(firstInfo, partialUpdatedInfo)
+          val lastInfoFromAdjacent: I = updateInfo(Option(adjacentId), adjacentCost, Option(adjacentInfo))
+          val updatedLastInfo: Option[I] = optionLastInfo match {
+            case None => Option(lastInfoFromAdjacent)
+            case Some(lastInfo) =>
+              if (sendingSameInfo(adjacentId, lastInfoFromAdjacent, lastInfo)) Option.empty
+              else if (numeric.gt(adjacentCost, lastInfo.totalCost)) Option.empty
+              else if (numeric.lt(adjacentCost, lastInfo.totalCost)) Option(lastInfoFromAdjacent)
+              else mergeSameCost(lastInfo, lastInfoFromAdjacent)
           }
-          (id, updatedInfo)
-        }.filter { case (_, updatedInfo) => updatedInfo.isDefined }
-          .mapValues(updatedInfo => updatedInfo.get)
+          (lastId, updatedLastInfo)
+        }.filter { case (_, info) => info.isDefined }
+          .mapValues(info => info.get)
           .map(identity)
         if (messageMap.isEmpty) Iterator.empty else Iterator((triplet.dstId, messageMap))
       }
