@@ -6,11 +6,10 @@ import org.apache.spark.graphx.{Graph, VertexId}
 import scala.reflect.ClassTag
 
 case class CostOnly[V: ClassTag, E: ClassTag](
-  override val graph: Graph[V, E]
+  override val graph: Graph[V, E],
+  override protected val backwardPath: Boolean = false
 )(implicit numeric: Numeric[E]) extends AllPairShortestPaths[V, E, CostOnlyInfo[E]] {
   type Info = CostOnlyInfo[E]
-
-  override protected val backwardPath: Boolean = false
 
   override protected def updateInfo(adjacentId: Option[VertexId], cost: E, adjacentInfo: Option[Info]): Info =
     CostOnlyInfo(cost)

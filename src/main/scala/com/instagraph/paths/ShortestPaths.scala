@@ -15,8 +15,11 @@ object ShortestPaths {
   }
 
   implicit class AllPairs[V: ClassTag, E: ClassTag](graph: Graph[V, E])(implicit numeric: Numeric[E]) {
-    def allPairsShortestPaths: Graph[Map[VertexId, CostOnlyInfo[E]], E] =
+    def allPairsShortestPathsFromOrigin: Graph[Map[VertexId, CostOnlyInfo[E]], E] =
       CostOnly(graph).compute
+
+    def allPairsShortestPathsFromDestination: Graph[Map[VertexId, CostOnlyInfo[E]], E] =
+      CostOnly(graph, backwardPath = true).compute
 
     def singleSuccessorAPSP: Graph[Map[VertexId, SinglePathInfo[E]], E] =
       SinglePath(graph).compute

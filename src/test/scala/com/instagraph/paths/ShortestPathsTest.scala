@@ -64,7 +64,7 @@ class ShortestPathsTest extends AnyFlatSpec with TestCase1 with TestCase2 {
 
       val sp: List[(VertexId, Map[VertexId, Int])] = test.graph
         .mapEdges(_ => 1)
-        .allPairsShortestPaths
+        .allPairsShortestPathsFromOrigin
         .mapVertices((_, spMap) => spMap.mapValues(info => info.totalCost).map(identity))
         .vertices
         .toLocalIterator
