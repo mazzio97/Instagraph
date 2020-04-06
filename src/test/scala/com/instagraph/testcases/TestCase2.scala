@@ -3,6 +3,7 @@ package com.instagraph.testcases
 import com.instagraph.SparkConfiguration._
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
 import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
+import com.instagraph.utils.DoubleUtils.TolerantDouble
 import org.apache.spark.graphx.Edge
 
 object TestCase2 extends TestCase[Int](
@@ -134,18 +135,18 @@ object TestCase2 extends TestCase[Int](
     11L -> EachFullRouteInfo(7, Set(List(0L, 1L, 3L, 4L, 5L, 6L, 11L), List(0L, 1L, 2L, 4L, 5L, 6L, 11L)))
   ),
   betweennessCentralitySolutions = Map(
-    0L -> 0.0,
-    1L -> 10.0,
-    2L -> 8.0,
-    3L -> 8.0,
-    4L -> 28.0,
-    5L -> 30.0,
-    6L -> 28.0,
-    7L -> 13.0,
-    8L -> 8.0,
-    9L -> 8.0,
-    10L -> 0.0,
-    11L -> 6.0
+    0L -> TolerantDouble(0.0),
+    1L -> TolerantDouble(10.0),
+    2L -> TolerantDouble(8.0),
+    3L -> TolerantDouble(8.0),
+    4L -> TolerantDouble(28.0),
+    5L -> TolerantDouble(30.0),
+    6L -> TolerantDouble(28.0),
+    7L -> TolerantDouble(13.0),
+    8L -> TolerantDouble(8.0),
+    9L -> TolerantDouble(8.0),
+    10L -> TolerantDouble(0.0),
+    11L -> TolerantDouble(6.0)
   ),
   degreeCentralitySolutions = Map(
     0L -> (0, 1),
@@ -162,17 +163,17 @@ object TestCase2 extends TestCase[Int](
     11L -> (1, 1)
   ),
   harmonicCentralitySolutions = Map(
-    0L -> 0,
-    1L -> 1.0,
-    2L -> 1.5,
-    3L -> 0.8333333333333333,
-    4L -> 2.083333333333333,
-    5L -> 2.283333333333333,
-    6L -> 2.45,
-    7L -> 2.5928571428571425,
-    8L -> 2.7178571428571425,
-    9L -> 3.328968253968254,
-    10L -> 3.2623015873015873,
-    11L -> 2.5928571428571425
+    0L -> TolerantDouble(0),
+    1L -> TolerantDouble(1.0),
+    2L -> TolerantDouble(1.5),
+    3L -> TolerantDouble(0.8333333333333333),
+    4L -> TolerantDouble(2.083333333333333),
+    5L -> TolerantDouble(2.283333333333333),
+    6L -> TolerantDouble(2.45),
+    7L -> TolerantDouble(2.5928571428571425),
+    8L -> TolerantDouble(2.7178571428571425),
+    9L -> TolerantDouble(3.328968253968254),
+    10L -> TolerantDouble(3.2623015873015873),
+    11L -> TolerantDouble(2.5928571428571425)
   )
 )

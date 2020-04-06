@@ -6,7 +6,7 @@ import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
 import com.instagraph.testcases.TestCase
 
 class AdjacentsTest extends InstagraphTest {
-  runTests { (n: Int, test: TestCase[Int]) =>
+  run { (n: Int, test: TestCase[Int]) =>
     "Successors from singleSuccessorsAPSP" should s"be contained into the set of adjacent vertices from test case $n" in {
       test.graph.singleSuccessorAPSP.vertices.foreach { case (origin, spMap) =>
         spMap.foreach { case (destination, info) =>

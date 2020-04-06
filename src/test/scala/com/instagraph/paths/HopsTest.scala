@@ -6,7 +6,7 @@ import com.instagraph.testcases.TestCase
 import org.apache.spark.graphx.VertexId
 
 class HopsTest extends InstagraphTest {
-  runTests { (n: Int, test: TestCase[Int]) =>
+  run { (n: Int, test: TestCase[Int]) =>
     "Shortest paths and fewest hops" should s"coincide for unitary edges graphs from test case $n" in {
       val numVertices: Int = test.graph.numVertices.toInt
 

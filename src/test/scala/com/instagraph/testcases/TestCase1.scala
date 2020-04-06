@@ -3,6 +3,7 @@ package com.instagraph.testcases
 import com.instagraph.SparkConfiguration._
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
 import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
+import com.instagraph.utils.DoubleUtils.TolerantDouble
 import org.apache.spark.graphx.Edge
 
 object TestCase1 extends TestCase[Int](
@@ -55,11 +56,11 @@ object TestCase1 extends TestCase[Int](
     4L -> EachFullRouteInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 2L, 3L, 4L), List(0L, 1L, 2L, 3L, 4L)))
   ),
   betweennessCentralitySolutions = Map(
-    0L -> 6.0,
-    1L -> 3.5,
-    2L -> 3.5,
-    3L -> 6.0,
-    4L -> 6.0
+    0L -> TolerantDouble(6.0),
+    1L -> TolerantDouble(3.5),
+    2L -> TolerantDouble(3.5),
+    3L -> TolerantDouble(6.0),
+    4L -> TolerantDouble(6.0)
   ),
   degreeCentralitySolutions = Map(
     0L -> (1, 2),
@@ -69,10 +70,10 @@ object TestCase1 extends TestCase[Int](
     4L -> (1, 1)
   ),
   harmonicCentralitySolutions = Map(
-    0L -> 2.083333333333333,
-    1L -> 2.083333333333333,
-    2L -> 2.083333333333333,
-    3L -> 2.083333333333333,
-    4L -> 2.083333333333333
+    0L -> TolerantDouble(2.083333333333333),
+    1L -> TolerantDouble(2.083333333333333),
+    2L -> TolerantDouble(2.083333333333333),
+    3L -> TolerantDouble(2.083333333333333),
+    4L -> TolerantDouble(2.083333333333333)
   )
 )
