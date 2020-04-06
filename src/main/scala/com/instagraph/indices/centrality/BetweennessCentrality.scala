@@ -16,10 +16,9 @@ case class BetweennessCentrality[E: ClassTag](implicit numeric: Numeric[E]) exte
   override def compute[V: ClassTag](graph: Graph[V, E]): Graph[Double, E] = {
     val initialGraph: Graph[VertexData, E] = graph.eachSuccessorWeightedAPSP.mapVertices { (_, shortestPaths) =>
       val updatedShortestPaths: ShortestPathsMap = shortestPaths.map { case (destination, info) =>
-        val totalShortestPaths: Int = info.adjacentMap.values.sum
         val successorsMap: NormalizedSuccessorsMap = info.adjacentMap
           .filter { case (next, _) => next != destination }
-          .mapValues { presences => presences.toDouble / totalShortestPaths }
+          .mapValues { presences => presences.toDouble / info.totalPresences }
           .map(identity) // https://github.com/scala/bug/issues/7005
         (destination, successorsMap)
       }.filter { case (_, info) => info.nonEmpty }

@@ -116,7 +116,7 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
           (lastId, updatedLastInfo)
         }.filter { case (_, info) => info.isDefined }
           .mapValues(info => info.get)
-          .map(identity)
+          .map(identity)  // https://github.com/scala/bug/issues/7005
         if (messageMap.isEmpty) Iterator.empty else Iterator((triplet.dstId, messageMap))
       }
 
