@@ -9,5 +9,8 @@ import scala.reflect.ClassTag
 case class TestCase[E: ClassTag] (
   graph: Graph[Int, E],
   adjacentsSolutions: Map[VertexId, Map[VertexId, EachPathWeightedInfo[E]]],
-  fullRoutesSolutions: Map[VertexId, EachFullRouteInfo[E]]
+  fullRoutesSolutions: Map[VertexId, EachFullRouteInfo[E]],
+  betweennessCentralitySolutions: Map[VertexId, Double],
+  degreeCentralitySolutions: Map[VertexId, (Int, Int)],
+  harmonicCentralitySolutions: Map[VertexId, Double]
 )

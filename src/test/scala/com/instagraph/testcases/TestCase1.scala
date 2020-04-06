@@ -53,5 +53,26 @@ object TestCase1 extends TestCase[Int](
     2L -> EachFullRouteInfo(2, Set(List(0L, 2L), List(0L, 1L, 2L))),
     3L -> EachFullRouteInfo(3, Set(List(0L, 1L, 3L), List(0L, 2L, 3L), List(0L, 1L, 2L, 3L))),
     4L -> EachFullRouteInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 2L, 3L, 4L), List(0L, 1L, 2L, 3L, 4L)))
+  ),
+  betweennessCentralitySolutions = Map(
+    0L -> 6.0,
+    1L -> 3.5,
+    2L -> 3.5,
+    3L -> 6.0,
+    4L -> 6.0
+  ),
+  degreeCentralitySolutions = Map(
+    0L -> (1, 2),
+    1L -> (1, 2),
+    2L -> (2, 1),
+    3L -> (2, 1),
+    4L -> (1, 1)
+  ),
+  harmonicCentralitySolutions = Map(
+    0L -> 2.083333333333333,
+    1L -> 2.083333333333333,
+    2L -> 2.083333333333333,
+    3L -> 2.083333333333333,
+    4L -> 2.083333333333333
   )
 )

@@ -6,8 +6,8 @@ import org.apache.spark.graphx.Graph
 import scala.reflect.ClassTag
 
 object Indices {
-  implicit class Indices[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
-    def degreeCentrality(normalize: Boolean = true): Graph[(V, (Int, Int)), E] =
+  implicit class Centrality[V: ClassTag, E: ClassTag](graph: Graph[V, E]) {
+    def degreeCentrality: Graph[(V, (Int, Int)), E] =
       transformWith(DegreeCentrality())
 
     def pageRank: Graph[(V, Double), E] =
