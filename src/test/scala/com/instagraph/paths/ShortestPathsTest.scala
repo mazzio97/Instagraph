@@ -3,13 +3,12 @@ package com.instagraph.paths
 import ShortestPaths._
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
 import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
-import com.instagraph.TestCase
-import com.instagraph.testcases.{TestCase1, TestCase2}
+import com.instagraph.testcases.{TestCase, TestCase1, TestCase2}
 import org.apache.spark.graphx.VertexId
 import org.scalatest.flatspec.AnyFlatSpec
 
-class ShortestPathsTest extends AnyFlatSpec with TestCase1 with TestCase2 {
-  val testCases: Seq[TestCase[Int]] = Seq(testCase1, testCase2)
+class ShortestPathsTest extends AnyFlatSpec {
+  val testCases: Seq[TestCase[Int]] = Seq(TestCase1, TestCase2)
 
   "Shortest paths with successors" should "contain the expected adjacent vertices" in {
     testCases.foreach { test =>

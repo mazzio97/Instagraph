@@ -1,7 +1,5 @@
 package com.instagraph
 
-import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
-import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
@@ -9,7 +7,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.reflect.ClassTag
 
-trait SparkTest {
+object SparkConfiguration {
   private val sparkConf  = new SparkConf()
     .setMaster("local[*]")  // Master is running on a local node.
     .setAppName("InstagraphTest") // Name of our spark app
@@ -28,9 +26,3 @@ trait SparkTest {
     Graph(vertices, edges)
   }
 }
-
-case class TestCase[E: ClassTag](
-  graph: Graph[Int, E],
-  adjacentsSolutions: Map[VertexId, Map[VertexId, EachPathWeightedInfo[E]]],
-  fullRoutesSolutions: Map[VertexId, EachFullRouteInfo[E]]
-)
