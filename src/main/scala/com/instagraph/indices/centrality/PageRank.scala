@@ -39,6 +39,6 @@ case class PageRank[E: ClassTag]() extends CentralityIndex[Double, E] {
 
     val normalizationFactor = finalGraph.numVertices / finalGraph.vertices.values.map(data => data.score).sum()
 
-    finalGraph.mapVertices { case(_, data) => data.score * normalizationFactor}
+    finalGraph.mapVertices { case (_, data) => data.score * normalizationFactor }
   }
 }

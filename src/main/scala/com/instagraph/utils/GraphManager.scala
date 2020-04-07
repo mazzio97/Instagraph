@@ -2,7 +2,7 @@ package com.instagraph.utils
 
 import org.apache.spark.graphx.{Edge, Graph, VertexId}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Row, SparkSession}
 
 import scala.reflect.ClassTag
 
@@ -10,9 +10,9 @@ class GraphManager[E: ClassTag](spark: SparkSession) {
   private val sparkContext = spark.sparkContext
   sparkContext.setLogLevel("ERROR")
 
-  def build(edgeValue: (String, String) => E, jsonPaths: String*): Graph[String, E] = {
-    val df = jsonPaths.map(spark.read.json(_))
-    val users = df.flatMap(_.columns).distinct
+  def build(edgeWeight: (String, String, Row) => E, jsonPaths: String*): Graph[String, E] = {
+    val dfSeq = jsonPaths.map(spark.read.json(_))
+    val users = dfSeq.flatMap(_.columns).distinct
     // Vertices of the graph are the users identified with an ID
     val vertices: RDD[(VertexId, String)] = sparkContext.parallelize(
       users.zipWithIndex.map { case (user, idx) => (idx.toLong, user) }
@@ -20,14 +20,15 @@ class GraphManager[E: ClassTag](spark: SparkSession) {
     // Extract the ID of a vertex given the username
     val correspondence: String => VertexId = user => vertices.filter(v => v._2 == user).first()._1
     // Edges of the graph are following relations between any pair of vertices
-    val edges: RDD[Edge[E]] = sparkContext.parallelize(df.flatMap(
-      _.collect()(0) // Extract first (and only) row for each column (user)
-        .getValuesMap[Seq[String]](users) // Map each vertex to its following
-        .mapValues[Seq[String]](_.filter(users.contains)) // Don't consider following outward vertices
-        .flatten { case (user, foll) => foll.map((user, _)) } // Convert map into pairs representing edges
-        .map(e => Edge(correspondence(e._1), correspondence(e._2), edgeValue)) // GraphX representation
-        .toSeq
-    ))
+    val edges: RDD[Edge[E]] = sparkContext.parallelize(
+      dfSeq.map(df => df.head()).flatMap(row => // Extract first (and only) row for each column (user)
+        row.getValuesMap[Seq[String]](users) // Map each vertex to its following
+          .mapValues[Seq[String]](_.filter(users.contains)) // Don't consider following outward vertices
+          .flatten { case (user, foll) => foll.map((user, _)) } // Convert map into pairs representing edges
+          .map(e => Edge(correspondence(e._1), correspondence(e._2), edgeWeight(e._1, e._2, row))) // GraphX representation
+          .toSeq
+      )
+    )
     Graph(vertices, edges)
   }
 

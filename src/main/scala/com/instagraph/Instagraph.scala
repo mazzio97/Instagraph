@@ -5,13 +5,14 @@ import java.nio.file.{Files, Paths}
 import com.instagraph.utils.GraphManager
 import org.apache.spark.SparkConf
 import org.apache.spark.graphx.Graph
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Row, SparkSession}
+
+import scala.reflect.ClassTag
 
 object Instagraph {
-  private val resourcesPath: String = "src/main/resources/"
-  private val graphPath = resourcesPath + "graph"
+  private val graphsPath = System.getProperty("user.home") + "/.instagraph/"
 
-  private val sparkConf  = new SparkConf()
+  private val sparkConf = new SparkConf()
     .setMaster("local[*]")
     .setAppName("Instagraph")
 
@@ -20,26 +21,27 @@ object Instagraph {
     .config(sparkConf)
     .getOrCreate()
 
-  def main(args: Array[String]): Unit = {
-    val manager = new GraphManager[Int](spark)
-    // If the graph has already been stored it is loaded, otherwise it is built using the file "data.json"
-    val graph: Graph[String, Int] = if (Files.exists(Paths.get(graphPath))) {
+  def followersGraph[E: ClassTag](edgeWeight: (String, String, Row) => E, jsonFiles: String*): Graph[String, E] = {
+    val manager = new GraphManager[E](spark)
+    val graphName = jsonFiles.map(path => path.split("/").last)
+      .map(name => name.takeWhile(c => c != '.'))
+      .mkString("+")
+    val graphPath = graphsPath + graphName
+    // If the graph has already been stored it is loaded, otherwise it is built and saved for future loadings
+    if (Files.exists(Paths.get(graphPath))) {
       manager.load(graphPath)
     } else {
-      val g = manager.build((_, _) => 1, resourcesPath + "data.json")
+      val g = manager.build(edgeWeight, jsonFiles:_*)
       manager.save(g, graphPath)
       g
     }
-    println(graph.numVertices)
-    println(graph.numEdges)
-    // Compute PageRank index on the graph
-    println("PageRank:")
-    graph.pageRank(0.001)
-      .vertices
-      .join(graph.vertices)
-      .values
-      .sortBy(_._1, ascending = false)
-      .take(10)
-      .foreach(println)
+  }
+
+  def unweightedFollowersGraph(jsonFiles: String*): Graph[String, Int] = followersGraph[Int]((_, _, _) => 1, jsonFiles:_*)
+
+  def main(args: Array[String]): Unit = {
+    val g = unweightedFollowersGraph(args:_*)
+    println(g.numVertices)
+    println(g.numEdges)
   }
 }
