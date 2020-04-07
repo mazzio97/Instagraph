@@ -21,10 +21,11 @@ object Instagraph {
     .config(sparkConf)
     .getOrCreate()
 
-  def followersGraph[E: ClassTag](edgeWeight: (String, String, Row) => E, jsonFiles: String*): Graph[String, E] = {
+  def followersGraph[E: ClassTag](edgeWeight: Seq[String] => E, jsonFiles: String*): Graph[String, E] = {
     val manager = new GraphManager[E](spark)
     val graphName = jsonFiles.map(path => path.split("/").last)
       .map(name => name.takeWhile(c => c != '.'))
+      .sorted
       .mkString("+")
     val graphPath = graphsPath + graphName
     // If the graph has already been stored it is loaded, otherwise it is built and saved for future loadings
@@ -37,9 +38,13 @@ object Instagraph {
     }
   }
 
-  def unweightedFollowersGraph(jsonFiles: String*): Graph[String, Int] = followersGraph[Int]((_, _, _) => 1, jsonFiles:_*)
+  def unweightedFollowersGraph(jsonFiles: String*): Graph[String, Int] = followersGraph[Int](_ => 1, jsonFiles:_*)
 
   def main(args: Array[String]): Unit = {
+    if (args.length == 0) {
+      println("Usage: java -jar instagraph.jar jsonFile1 [jsonFile2 [jsonFile3 ... ]]]")
+      return
+    }
     val g = unweightedFollowersGraph(args:_*)
     println(g.numVertices)
     println(g.numEdges)
