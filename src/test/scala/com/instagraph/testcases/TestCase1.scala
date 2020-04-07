@@ -55,13 +55,6 @@ object TestCase1 extends TestCase[Int](
     3L -> EachFullRouteInfo(3, Set(List(0L, 1L, 3L), List(0L, 2L, 3L), List(0L, 1L, 2L, 3L))),
     4L -> EachFullRouteInfo(4, Set(List(0L, 1L, 3L, 4L), List(0L, 2L, 3L, 4L), List(0L, 1L, 2L, 3L, 4L)))
   ),
-  betweennessCentralitySolutions = Map(
-    0L -> TolerantDouble(6.0),
-    1L -> TolerantDouble(3.5),
-    2L -> TolerantDouble(3.5),
-    3L -> TolerantDouble(6.0),
-    4L -> TolerantDouble(6.0)
-  ),
   degreeCentralitySolutions = Map(
     0L -> (1, 2),
     1L -> (1, 2),
@@ -69,11 +62,25 @@ object TestCase1 extends TestCase[Int](
     3L -> (2, 1),
     4L -> (1, 1)
   ),
+  pageRankSolutions = Map(
+    0L -> TolerantDouble(1.1319885118034128),
+    1L -> TolerantDouble(0.6311596882000914),
+    2L -> TolerantDouble(0.8992721773930266),
+    3L -> TolerantDouble(1.1824199222270388),
+    4L -> TolerantDouble(1.15515970037643)
+  ),
   harmonicCentralitySolutions = Map(
     0L -> TolerantDouble(2.083333333333333),
     1L -> TolerantDouble(2.083333333333333),
     2L -> TolerantDouble(2.083333333333333),
     3L -> TolerantDouble(2.083333333333333),
     4L -> TolerantDouble(2.083333333333333)
+  ),
+  betweennessCentralitySolutions = Map(
+    0L -> TolerantDouble(6.0),
+    1L -> TolerantDouble(3.5),
+    2L -> TolerantDouble(3.5),
+    3L -> TolerantDouble(6.0),
+    4L -> TolerantDouble(6.0)
   )
 )

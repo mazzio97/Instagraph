@@ -134,20 +134,6 @@ object TestCase2 extends TestCase[Int](
     )),
     11L -> EachFullRouteInfo(7, Set(List(0L, 1L, 3L, 4L, 5L, 6L, 11L), List(0L, 1L, 2L, 4L, 5L, 6L, 11L)))
   ),
-  betweennessCentralitySolutions = Map(
-    0L -> TolerantDouble(0.0),
-    1L -> TolerantDouble(10.0),
-    2L -> TolerantDouble(8.0),
-    3L -> TolerantDouble(8.0),
-    4L -> TolerantDouble(28.0),
-    5L -> TolerantDouble(30.0),
-    6L -> TolerantDouble(28.0),
-    7L -> TolerantDouble(13.0),
-    8L -> TolerantDouble(8.0),
-    9L -> TolerantDouble(8.0),
-    10L -> TolerantDouble(0.0),
-    11L -> TolerantDouble(6.0)
-  ),
   degreeCentralitySolutions = Map(
     0L -> (0, 1),
     1L -> (1, 2),
@@ -162,6 +148,20 @@ object TestCase2 extends TestCase[Int](
     10L -> (2, 0),
     11L -> (1, 1)
   ),
+  pageRankSolutions = Map(
+    0L -> TolerantDouble(0.3166609616203134),
+    1L -> TolerantDouble(0.5858227789975797),
+    2L -> TolerantDouble(0.5656356426942848),
+    3L -> TolerantDouble(0.5656356426942848),
+    4L -> TolerantDouble(1.2782415542005978),
+    5L -> TolerantDouble(1.4031662826908213),
+    6L -> TolerantDouble(0.9130066317639124),
+    7L -> TolerantDouble(0.7046887801199762),
+    8L -> TolerantDouble(0.9156464247222931),
+    9L -> TolerantDouble(1.6939458857362417),
+    10L -> TolerantDouble(2.3528606346397174),
+    11L -> TolerantDouble(0.7046887801199762)
+  ),
   harmonicCentralitySolutions = Map(
     0L -> TolerantDouble(0),
     1L -> TolerantDouble(1.0),
@@ -175,5 +175,19 @@ object TestCase2 extends TestCase[Int](
     9L -> TolerantDouble(3.328968253968254),
     10L -> TolerantDouble(3.2623015873015873),
     11L -> TolerantDouble(2.5928571428571425)
+  ),
+  betweennessCentralitySolutions = Map(
+    0L -> TolerantDouble(0.0),
+    1L -> TolerantDouble(10.0),
+    2L -> TolerantDouble(8.0),
+    3L -> TolerantDouble(8.0),
+    4L -> TolerantDouble(28.0),
+    5L -> TolerantDouble(30.0),
+    6L -> TolerantDouble(28.0),
+    7L -> TolerantDouble(13.0),
+    8L -> TolerantDouble(8.0),
+    9L -> TolerantDouble(8.0),
+    10L -> TolerantDouble(0.0),
+    11L -> TolerantDouble(6.0)
   )
 )
