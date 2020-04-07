@@ -12,8 +12,8 @@ object Instagraph {
   private val graphPath = resourcesPath + "graph"
 
   private val sparkConf  = new SparkConf()
-    .setMaster("local[*]")  // Master is running on a local node.
-    .setAppName("Instagraph") // Name of our spark app
+    .setMaster("local[*]")
+    .setAppName("Instagraph")
 
   private val spark = SparkSession
     .builder()
@@ -26,17 +26,19 @@ object Instagraph {
     val graph: Graph[String, Int] = if (Files.exists(Paths.get(graphPath))) {
       manager.load(graphPath)
     } else {
-      val g = manager.build(resourcesPath + "data.json", 1)
+      val g = manager.build((_, _) => 1, resourcesPath + "data.json")
       manager.save(g, graphPath)
       g
     }
+    println(graph.numVertices)
+    println(graph.numEdges)
     // Compute PageRank index on the graph
     println("PageRank:")
     graph.pageRank(0.001)
       .vertices
       .join(graph.vertices)
       .values
-      .sortBy(_._2, ascending = false)
+      .sortBy(_._1, ascending = false)
       .take(10)
       .foreach(println)
   }
