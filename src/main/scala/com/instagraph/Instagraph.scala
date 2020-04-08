@@ -5,16 +5,14 @@ import java.nio.file.{Files, Paths}
 import com.instagraph.utils.GraphManager
 import org.apache.spark.SparkConf
 import org.apache.spark.graphx.Graph
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 import scala.reflect.ClassTag
 
 object Instagraph {
   private val graphsPath = System.getProperty("user.home") + "/.instagraph/"
 
-  private val sparkConf = new SparkConf()
-    .setMaster("local[*]")
-    .setAppName("Instagraph")
+  private val sparkConf = new SparkConf().setAppName("Instagraph")
 
   private val spark = SparkSession
     .builder()
@@ -39,14 +37,4 @@ object Instagraph {
   }
 
   def unweightedFollowersGraph(jsonFiles: String*): Graph[String, Int] = followersGraph[Int](_ => 1, jsonFiles:_*)
-
-  def main(args: Array[String]): Unit = {
-    if (args.length == 0) {
-      println("Usage: java -jar instagraph.jar jsonFile1 [jsonFile2 [jsonFile3 ... ]]]")
-      return
-    }
-    val g = unweightedFollowersGraph(args:_*)
-    println(g.numVertices)
-    println(g.numEdges)
-  }
 }
