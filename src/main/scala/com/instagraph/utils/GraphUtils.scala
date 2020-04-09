@@ -1,5 +1,7 @@
 package com.instagraph.utils
 
+import java.io.PrintWriter
+
 import org.apache.spark.graphx.{Edge, Graph}
 
 import scala.reflect.ClassTag
@@ -30,6 +32,29 @@ object GraphUtils {
       graph.subgraph(epred = e1 =>
         graph.edges.filter(e2 => e1 == Edge(e2.dstId, e2.srcId, e2.attr)).count() > 0
       )
+    }
+  }
+
+  implicit class Export[VD, ED](g: Graph[VD, ED]) {
+    def exportToGEXF(filePath: String): Unit = {
+      val gexf = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<gexf xmlns=\"http://www.gexf.net/1.2draft\" version=\"1.2draft\">\n" +
+        "  <graph mode=\"static\" defaultedgetype=\"directed\">\n" +
+        "    <nodes>\n" +
+        g.vertices.map(v => "      <node id=\"" + v._1 + "\" label=\"" +
+          v._2 + "\" />\n").collect.mkString +
+        "    </nodes>\n" +
+        "    <edges>\n" +
+        g.edges.map(e => "      <edge source=\"" + e.srcId +
+          "\" target=\"" + e.dstId + "\" label=\"" + e.attr +
+          "\" />\n").collect.mkString +
+        "    </edges>\n" +
+        "  </graph>\n" +
+        "</gexf>"
+
+      val pw = new PrintWriter(filePath)
+      pw.write(gexf)
+      pw.close()
     }
   }
 }
