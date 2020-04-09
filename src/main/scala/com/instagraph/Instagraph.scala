@@ -1,7 +1,8 @@
 package com.instagraph
 
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.graphx.{Edge, Graph, VertexId}
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkConf
+import org.apache.spark.graphx.{Edge, Graph}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
