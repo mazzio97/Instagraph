@@ -1,6 +1,6 @@
-package com.instagraph
+package com.instagraph.utils
 
-import org.apache.spark.graphx.{Edge, Graph, VertexId}
+import org.apache.spark.graphx.{Edge, Graph}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
@@ -8,16 +8,16 @@ import org.apache.spark.{SparkConf, SparkContext}
 import scala.reflect.ClassTag
 
 object SparkConfiguration {
-  private val sparkConf  = new SparkConf()
+  val sparkConfiguration: SparkConf = new SparkConf()
     .setMaster("local[*]")  // Master is running on a local node.
     .setAppName("InstagraphTest") // Name of our spark app
 
-  private val spark = SparkSession
+  val sparkSession: SparkSession = SparkSession
     .builder()
-    .config(sparkConf)
+    .config(sparkConfiguration)
     .getOrCreate()
 
-  val sparkContext: SparkContext = spark.sparkContext
+  val sparkContext: SparkContext = sparkSession.sparkContext
   sparkContext.setLogLevel("ERROR")
 
   def createGraph[E: ClassTag](edges: RDD[Edge[E]]): Graph[Int, E] = {
