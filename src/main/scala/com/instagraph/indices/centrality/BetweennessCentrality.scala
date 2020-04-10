@@ -6,7 +6,7 @@ import org.apache.spark.graphx.{EdgeDirection, EdgeTriplet, Graph, VertexId}
 
 import scala.reflect.ClassTag
 
-case class BetweennessCentrality[E: ClassTag](implicit numeric: Numeric[E]) extends CentralityIndex[Double, E] {
+case class BetweennessCentrality[E: ClassTag]()(implicit numeric: Numeric[E]) extends CentralityIndex[Double, E] {
   type NormalizedSuccessorsMap = Map[VertexId, Double]
   type ShortestPathsMap = Map[VertexId, NormalizedSuccessorsMap]
   type ScoresMap = Map[VertexId, Double]
