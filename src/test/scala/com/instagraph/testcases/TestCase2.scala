@@ -1,6 +1,6 @@
 package com.instagraph.testcases
 
-import com.instagraph.SparkConfiguration._
+import com.instagraph.utils.SparkConfiguration._
 import com.instagraph.paths.allpairs.adjacents.EachPathWeightedInfo
 import com.instagraph.paths.allpairs.fullroutes.EachFullRouteInfo
 import com.instagraph.utils.DoubleUtils.TolerantDouble
