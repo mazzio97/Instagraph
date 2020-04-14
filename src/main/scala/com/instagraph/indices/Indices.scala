@@ -19,7 +19,7 @@ object Indices {
     def betweennessCentrality(implicit numeric: Numeric[E]): Graph[(V, Double), E] =
       transformWith(BetweennessCentrality())
 
-    private def transformWith[M: ClassTag](index: CentralityIndex[M, E]): Graph[(V, M), E] =
+    def transformWith[M: ClassTag](index: CentralityIndex[M, E]): Graph[(V, M), E] =
       index.compute(graph).outerJoinVertices(graph.vertices)((_, index, value) => (value.get, index))
   }
 }

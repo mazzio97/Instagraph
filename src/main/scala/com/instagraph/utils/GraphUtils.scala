@@ -2,6 +2,8 @@ package com.instagraph.utils
 
 import java.io.PrintWriter
 
+import com.instagraph.indices.Indices.Centrality
+import com.instagraph.indices.centrality.CentralityIndex
 import org.apache.spark.graphx.{Edge, Graph}
 
 import scala.reflect.ClassTag
@@ -35,17 +37,17 @@ object GraphUtils {
     }
   }
 
-  implicit class Export[VD, ED](g: Graph[VD, ED]) {
+  implicit class Export[V, E](graph: Graph[V, E]) {
     def exportToGEXF(filePath: String): Unit = {
       val gexf = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<gexf xmlns=\"http://www.gexf.net/1.2draft\" version=\"1.2draft\">\n" +
         "  <graph mode=\"static\" defaultedgetype=\"directed\">\n" +
         "    <nodes>\n" +
-        g.vertices.map(v => "      <node id=\"" + v._1 + "\" label=\"" +
+        graph.vertices.map(v => "      <node id=\"" + v._1 + "\" label=\"" +
           v._2 + "\" />\n").collect.mkString +
         "    </nodes>\n" +
         "    <edges>\n" +
-        g.edges.map(e => "      <edge source=\"" + e.srcId +
+        graph.edges.map(e => "      <edge source=\"" + e.srcId +
           "\" target=\"" + e.dstId + "\" label=\"" + e.attr +
           "\" />\n").collect.mkString +
         "    </edges>\n" +
@@ -56,5 +58,21 @@ object GraphUtils {
       pw.write(gexf)
       pw.close()
     }
+  }
+
+  implicit class Stats[V: ClassTag, M: ClassTag, E: ClassTag](graph: Graph[(V, M), E]) {
+    def topVertices(n: Int = 10)(implicit ord: Ordering[M]): Iterable[(V, M)] =
+      graph.vertices
+        .map(_._2)
+        .sortBy(_._2, ascending = false)
+        .take(n)
+  }
+
+  def withElapsedTime[V: ClassTag, M: ClassTag, E: ClassTag](operation: => Graph[(V, M), E]): Graph[(V, M), E] = {
+    val begin = System.currentTimeMillis()
+    val result = operation
+    val end = System.currentTimeMillis()
+    println("Elapsed time: " + (end - begin).toDouble / 1000 + " seconds")
+    result
   }
 }

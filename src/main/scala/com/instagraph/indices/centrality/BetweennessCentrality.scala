@@ -74,4 +74,3 @@ case class BetweennessCentrality[E: ClassTag]()(implicit numeric: Numeric[E]) ex
     ).mapVertices((_, vertexData) => vertexData.score)
   }
 }
-
