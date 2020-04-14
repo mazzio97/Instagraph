@@ -2,7 +2,7 @@ lazy val app = (project in file(".")).settings(
   name := "instagraph",
   version := "1.0",
   scalaVersion := "2.11.12",
-  mainClass in Compile := Some("com.instagraph.Main")
+  mainClass in Compile := Some("com.instagraph.Instagraph")
 )
 
 val sparkVersion = "2.4.5"
