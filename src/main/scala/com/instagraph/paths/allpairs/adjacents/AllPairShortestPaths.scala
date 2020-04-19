@@ -63,8 +63,7 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
    */
   protected def mergeSameCost(mInfo: I, nInfo: I): Option[I]
 
-  private final def toSelf(vertexId: VertexId): I =
-    updateInfo(Option.empty, numeric.zero, Option.empty)
+  private final val toSelf: I = updateInfo(Option.empty, numeric.zero, Option.empty)
 
   private final def startPregel(graph: Graph[V, E]): Graph[ShortestPathsMap, E] = {
     /*
@@ -134,7 +133,7 @@ abstract class AllPairShortestPaths[V: ClassTag, E: ClassTag, I <: ShortestPaths
         else mergeSameCost(mInfo, nInfo).getOrElse(mInfo)
       })
 
-    graph.mapVertices((id, _) => Map(id -> toSelf(id))).pregel[ShortestPathsMap](initialMsg = Map.empty)(
+    graph.mapVertices((id, _) => Map(id -> toSelf)).pregel[ShortestPathsMap](initialMsg = Map.empty)(
       vprog = vertexProgram, sendMsg = sendMessage, mergeMsg = mergeMessages
     )
   }
